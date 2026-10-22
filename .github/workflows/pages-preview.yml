@@ -1,0 +1,55 @@
+name: GitHub Pages preview
+on:
+  push:
+    branches: [test]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: tomzlab-pages-preview
+  cancel-in-progress: true
+jobs:
+  package:
+    name: Package test site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check static site
+        run: python3 scripts/check_site.py
+      - name: Prepare public-only Pages artifact
+        run: |
+          mkdir -p _site/assets/css _site/assets/icons
+          cp index.html notes.html projects.html about.html 404.html _site/
+          cp assets/css/site.css _site/assets/css/
+          cp assets/icons/favicon.svg _site/assets/icons/
+          touch _site/.nojekyll
+          echo 'User-agent: *' > _site/robots.txt
+          echo 'Disallow: /' >> _site/robots.txt
+          python3 - <<'PY'
+          from pathlib import Path
+          for path in Path('_site').glob('*.html'):
+              html = path.read_text(encoding='utf-8')
+              html = html.replace('<meta name="viewport"', '<meta name="robots" content="noindex, nofollow">\n  <meta name="viewport"', 1)
+              path.write_text(html, encoding='utf-8')
+          PY
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+  deploy:
+    name: Publish test preview
+    needs: package
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
