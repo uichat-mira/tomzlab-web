@@ -23,7 +23,8 @@ jobs:
           cp assets/css/site.css _site/assets/css/
           cp assets/icons/favicon.svg _site/assets/icons/
           touch _site/.nojekyll
-          printf 'User-agent: *\\nDisallow: /\\n' > _site/robots.txt
+          echo 'User-agent: *' > _site/robots.txt
+          echo 'Disallow: /' >> _site/robots.txt
           python3 - <<'PY'
           from pathlib import Path
           for path in Path('_site').glob('*.html'):
