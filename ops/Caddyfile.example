@@ -1,0 +1,17 @@
+# Reference only: NOT active before ICP approval and owner authorization.
+# Inspect existing Caddy config; append safely, do not replace other vhosts.
+tomzlab.cn, www.tomzlab.cn {
+    @www host www.tomzlab.cn
+    redir @www https://tomzlab.cn{uri} permanent
+
+    root * /srv/www/tomzlab.cn/current
+    encode zstd gzip
+    @private path /.git* /.github/* /ops/* /docs/* /scripts/* /AGENTS.md /README.md
+    respond @private 404
+    handle_errors {
+        @not_found expression {err.status_code} == 404
+        rewrite @not_found /404.html
+        file_server
+    }
+    file_server
+}
