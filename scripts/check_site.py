@@ -50,7 +50,10 @@ def main():
             continue
         try:
             parsed = Links()
-            parsed.feed(path.read_text(encoding="utf-8"))
+            html = path.read_text(encoding="utf-8")
+            parsed.feed(html)
+            if "粤ICP备2026168682号" not in html or "备案信息（待核发）" in html:
+                errors.append(f"invalid ICP filing footer: {file}")
             if parsed.lang != "zh-CN" or not parsed.has_viewport or not parsed.has_title:
                 errors.append(f"missing base metadata: {file}")
             if file != "404.html" and not parsed.has_description:
