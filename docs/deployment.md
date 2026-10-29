@@ -2,7 +2,7 @@
 
 ## Current boundary
 
-`tomzlab.cn` is pending ICP review. No action in this repository deploys to or alters the existing Alibaba Cloud VPS, DNS, or Caddy configuration. The first production release requires confirmed ICP approval and explicit authorization.
+`tomzlab.cn` received ICP approval on 2026-10-29 (`粤ICP备2026168682号`). The site owner authorized first production release on 2026-10-29. The repository still does not automatically change DNS, Caddy, or server files; verify those separately before declaring the site live.
 
 ## Environment model
 
@@ -22,7 +22,7 @@
 
 ## Production prerequisites
 
-1. Confirm the filing approval and actual ICP number. Replace the provisional footer text with the issued number linked to https://beian.miit.gov.cn/.
+1. Confirm filing approval (`粤ICP备2026168682号`, 2026-10-29) and footer linked to https://beian.miit.gov.cn/.
 2. Review existing live Caddy configuration before extending it. Use a dedicated web root and never overwrite the other sites.
 3. Promote the reviewed exact candidate `dev → test → prod`. Release only the web asset allowlist, not repo internal files.
 4. Verify HTTPS, pages, 404, links, viewport behavior, official footer and redirects; run deployed production smoke (T5). Keep a rollback anchor.
