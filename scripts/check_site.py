@@ -52,6 +52,10 @@ def main():
             parsed = Links()
             html = path.read_text(encoding="utf-8")
             parsed.feed(html)
+            if 'href="https://tomz.io/' in html or 'href="https://github.com/dangjingtao/qishu' in html:
+                errors.append(f"retired project link on public page: {file}")
+            if file == "projects.html" and 'href="https://mira.tomz.io/"' not in html:
+                errors.append("missing Mira project documentation link")
             if "粤ICP备2026168682号" not in html or "备案信息（待核发）" in html:
                 errors.append(f"invalid ICP filing footer: {file}")
             if parsed.lang != "zh-CN" or not parsed.has_viewport or not parsed.has_title:
