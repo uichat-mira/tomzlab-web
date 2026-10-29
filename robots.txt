@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://tomzlab.cn/sitemap.xml
