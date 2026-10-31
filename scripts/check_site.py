@@ -6,7 +6,7 @@ from urllib.parse import urlsplit, unquote
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ["index.html", "notes.html", "projects.html", "about.html", "404.html"]
+PAGES = ["index.html", "notes.html", "weekly.html", "projects.html", "about.html", "404.html"]
 NAV = PAGES[:-1]
 
 class Links(HTMLParser):
@@ -52,7 +52,8 @@ def main():
             parsed = Links()
             html = path.read_text(encoding="utf-8")
             parsed.feed(html)
-            if 'href="https://tomz.io/' in html or 'href="https://github.com/dangjingtao/qishu' in html:
+            # tomz.io is the mother site and may be linked; retired repos may not.
+            if 'href="https://github.com/dangjingtao/qishu' in html:
                 errors.append(f"retired project link on public page: {file}")
             if file == "projects.html" and 'href="https://mira.tomz.io/"' not in html:
                 errors.append("missing Mira project documentation link")
@@ -82,7 +83,7 @@ def main():
     sitemap = ROOT / "sitemap.xml"
     try:
         paths = [urlsplit(e.text or "").path for e in ET.parse(sitemap).findall(".//{*}loc")]
-        expected = ["/", "/notes.html", "/projects.html", "/about.html"]
+        expected = ["/", "/notes.html", "/weekly.html", "/projects.html", "/about.html"]
         if sorted(paths) != sorted(expected):
             errors.append("invalid sitemap paths")
     except (OSError,ET.ParseError):
