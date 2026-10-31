@@ -59,6 +59,10 @@ def main():
                 errors.append("missing Mira project documentation link")
             if "粤ICP备2026168682号" not in html or "备案信息（待核发）" in html:
                 errors.append(f"invalid ICP filing footer: {file}")
+            if file != "404.html":
+                expected_url = "https://tomzlab.cn/" if file == "index.html" else f"https://tomzlab.cn/{file}"
+                if f'<link rel="canonical" href="{expected_url}">' not in html:
+                    errors.append(f"missing or wrong canonical: {file}")
             if parsed.lang != "zh-CN" or not parsed.has_viewport or not parsed.has_title:
                 errors.append(f"missing base metadata: {file}")
             if file != "404.html" and not parsed.has_description:
