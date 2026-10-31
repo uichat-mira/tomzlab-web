@@ -9,14 +9,17 @@
   <title>页面走丢了 · 党靖涛的记事本</title>
   <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
   <link rel="stylesheet" href="assets/css/site.css">
+  <script>document.documentElement.classList.add("js")</script>
 </head>
 <body>
   <a class="skip-link" href="#main">跳至正文</a>
   <header class="site-header"><div class="container header-inner">
-    <a class="brand" href="index.html" aria-label="党靖涛的记事本，返回首页"><span class="brand-mark" aria-hidden="true">t</span>tomzlab<span class="brand-dot">.cn</span></a>
-    <nav class="site-nav" aria-label="主导航"><a href="index.html">首页</a><a href="notes.html">记录</a><a href="projects.html">项目</a><a href="about.html">关于</a></nav>
+    <a class="brand" href="index.html" aria-label="tomzlab.cn，返回首页"><img class="brand-mark" src="assets/icons/logo.svg" alt="" width="24" height="28">tomzlab<span class="brand-dot">.cn</span></a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="导航"><span class="nav-toggle-bars" aria-hidden="true"></span></button>
+    <nav class="site-nav" id="site-nav" aria-label="主导航"><a href="index.html">首页</a><a href="notes.html">记录</a><a href="weekly.html">周刊</a><a href="projects.html">项目</a><a href="about.html">关于</a></nav>
   </div></header>
   <main id="main" class="container"><div class="error-page"><div class="kicker">NOT FOUND</div><h1 class="error-code">404.</h1><p>这页纸好像不在记事本里。</p><a class="button-primary" href="index.html">返回首页 ↗</a></div></main>
-  <footer class="container site-footer"><span>© 2026 · 党靖涛的记事本</span><div class="footer-links"><a href="about.html">关于本站</a><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">粤ICP备2026168682号</a></div></footer>
+  <footer class="container site-footer"><span>© 2026 · 党靖涛的记事本</span><div class="footer-links"><a href="about.html">关于本站</a><a href="https://tomz.io/" target="_blank" rel="noopener">母站 tomz.io ↗</a><a href="https://mira.tomz.io/" target="_blank" rel="noopener">工程站 mira.tomz.io ↗</a><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">粤ICP备2026168682号</a></div></footer>
+  <script src="assets/js/nav.js" defer></script>
 </body>
 </html>

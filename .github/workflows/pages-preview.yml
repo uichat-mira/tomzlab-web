@@ -18,10 +18,9 @@ jobs:
         run: python3 scripts/check_site.py
       - name: Prepare public-only Pages artifact
         run: |
-          mkdir -p _site/assets/css _site/assets/icons
-          cp index.html notes.html projects.html about.html 404.html _site/
-          cp assets/css/site.css _site/assets/css/
-          cp assets/icons/favicon.svg _site/assets/icons/
+          mkdir -p _site
+          cp index.html notes.html weekly.html projects.html about.html 404.html _site/
+          cp -r assets _site/assets
           touch _site/.nojekyll
           echo 'User-agent: *' > _site/robots.txt
           echo 'Disallow: /' >> _site/robots.txt
