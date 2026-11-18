@@ -1,31 +1,20 @@
-# Deployment and acceptance contract
+# Domestic site deployment and acceptance
 
-## Current boundary
+## Current reality
 
-`tomzlab.cn` received ICP approval on 2026-10-29 (`粤ICP备2026168682号`). The site owner authorized first production release on 2026-10-29. The repository still does not automatically change DNS, Caddy, or server files; verify those separately before declaring the site live.
+tomzlab.cn has ICP approval, and the owner's public-security registration is 粤公网安备44020302000372号. The existing Alibaba Cloud Caddy site serves the static homepage and indexes; the independent production workflow in uichat-mira/mira-cloud-infra pins a tomzlab-web prod SHA, packages a hardcoded list of raw source files, and atomically swaps /srv/www/tomzlab.cn/current with rollback. **That workflow does not yet support Folio build output.**
 
-## Environment model
+## Folio candidate (not yet deployed)
 
-- `feat/*`: isolated source changes; PR checks, no deployment.
-- `dev`: integration and checks.
-- `test`: checked candidate plus **GitHub Pages preview**, no separate paid server.
-- `prod`: production source branch; not a deployment itself until a deployment mechanism is authorized.
-- `main`: bootstrap only; does not trigger deployment.
+The first Folio consumer is intentionally isolated under /journal/. Root /, /notes.html, /weekly.html, /projects.html and /about.html remain stable. We use Folio's published 0.1.1 public API only; do not fork its CSS, runtime or Vite adapter. Real authored content must be reviewed before merging. External mother-site articles remain external links; do not silently duplicate them.
 
-## Test preview
+Build with Node 24 and `npm ci && npm run build`; output is `_site/`, with nested /journal/index.html, article/index.html and Folio's static SEO metadata. Only this generated public directory may become a release artifact. Nothing in node_modules, folio-site source, workflows or private project paths belongs in the origin webroot.
 
-1. Repository **Settings → Pages → Build and deployment → Source → GitHub Actions**. This is a one-time prerequisite and may require an owner/admin. Do not attach `tomzlab.cn` as a Pages custom domain.
-2. Merge/promote the candidate to `test`; `.github/workflows/pages-preview.yml` deploys the allowlisted static HTML, CSS and favicon. Preview address: https://uichat-mira.github.io/tomzlab-web/.
-3. Preview builds add `noindex, nofollow`, disallow crawling in `robots.txt`, and omit production sitemap. All links are relative for the Pages project subpath.
-4. Verify desktop/mobile layouts, local navigation and actual Pages URL (T4). Pages is public; do not store private content.
-5. For arbitrary deeply nested invalid URLs, relative assets/404 navigation may differ. This first version supports only root-level HTML pages and flat missing-page URLs.
+## Gates
 
-## Production prerequisites
+1. feat/* PR → dev: CI builds and checks both stable legacy entrypoints and Folio's server-visible static content, route, canonical and assets.
+2. dev → test: GitHub Pages preview at https://uichat-mira.github.io/tomzlab-web/. Use the project-base build for /journal and recursively add noindex/nofollow to every HTML page. Verify real desktop/mobile navigation and JS-disabled article reading (T4); this is public preview, not private storage.
+3. Before test → prod: update mira-cloud-infra deploy workflow to fetch the exact approved site prod commit, install locked npm dependencies on CI, build for /journal/, validate the generated artifact and package only `_site/`. Extend the site origin T5 to /journal/, a nested article, bundled assets, existing weekly page and both filings. Retain atomic rollback and site-scoped Caddy configuration.
+4. Do not interpret a CI-green PR, a prod branch merge, or a new Pages preview as a successful domestic deployment. Confirm the actual live hostname over HTTPS (T5) after authorized publishing.
 
-1. Confirm filing approval (`粤ICP备2026168682号`, 2026-10-29) and footer linked to https://beian.miit.gov.cn/.
-2. Review existing live Caddy configuration before extending it. Use a dedicated web root and never overwrite the other sites.
-3. Promote the reviewed exact candidate `dev → test → prod`. Release only the web asset allowlist, not repo internal files.
-4. Verify HTTPS, pages, 404, links, viewport behavior, official footer and redirects; run deployed production smoke (T5). Keep a rollback anchor.
-5. Handle any applicable public-security filing/display after release within the statutory timeframe.
-
-`ops/Caddyfile.example` is **reference only**, not activated automatically.
+Do not alter DNS, reverse proxy, certificate handling or other services as a side-effect of the application migration.

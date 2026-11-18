@@ -57,7 +57,7 @@ def main():
                 errors.append(f"retired project link on public page: {file}")
             if file == "projects.html" and 'href="https://mira.tomz.io/"' not in html:
                 errors.append("missing Mira project documentation link")
-            if "粤ICP备2026168682号" not in html or "备案信息（待核发）" in html:
+            if "粤ICP备2026168682号-1" not in html or "粤公网安备44020302000372号" not in html or "备案信息（待核发）" in html:
                 errors.append(f"invalid ICP filing footer: {file}")
             if file != "404.html":
                 expected_url = "https://tomzlab.cn/" if file == "index.html" else f"https://tomzlab.cn/{file}"
@@ -79,6 +79,10 @@ def main():
                     errors.append(f"root/protocol-relative link not Pages-safe: {file} {href}")
                     continue
                 target = unquote(uri.path) or file
+                if target == "journal/":
+                    if not (ROOT / "folio-site" / "index.html").is_file():
+                        errors.append("missing Folio consumer for journal/")
+                    continue
                 absolute = (ROOT / target).resolve()
                 if not absolute.is_relative_to(ROOT) or not absolute.is_file():
                     errors.append(f"broken local link: {file} {href}")

@@ -1,0 +1,18 @@
+:root {
+  --folio-font-display: "Iowan Old Style", "Songti SC", "Noto Serif CJK SC", Georgia, serif;
+  --folio-background: #faf9f6;
+}
+.tomzlab-reading-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px 20px;
+  border-top: 1px solid #e7e5de;
+  padding: 28px 18px;
+  font-size: 12px;
+  line-height: 1.8;
+  color: #686860;
+}
+.tomzlab-reading-footer a { text-decoration: underline; text-underline-offset: 3px; }
+.tomzlab-reading-footer a:focus-visible { outline: 2px solid #586556; outline-offset: 3px; }
