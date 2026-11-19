@@ -1,4 +1,5 @@
-
 node_modules/
 _site/
 .DS_Store
+_folio_source/
+folio-site/.vite/

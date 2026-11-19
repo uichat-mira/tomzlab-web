@@ -1,19 +1,9 @@
 # tomzlab-web — Repository Instructions
 
-Follow the current uichat-mira/.github/AGENTS.md and its routed policy.
+Follow current uichat-mira/.github/AGENTS.md and its routed policies.
 
-## Product boundary
-
-- Official production hostname: tomzlab.cn; noncommercial, individual site “党靖涛的记事本”. No business landing pages, paid offerings, account system or public API gateway.
-- Pearl-white identity, reviewed real content only, accessible zh-CN navigation and responsive design. Do not fabricate posts or duplicate mother-site articles without explicit content ownership.
-- Root entrypoint and existing stable HTML URLs remain handcrafted static pages. **Owner-approved Folio integration** is scoped initially to a self-contained /journal/ reading area, built from reviewed Git Markdown with published @uichat-mira/folio public APIs. This replaces the previous blanket “no framework/bundler” restriction **only** for that isolated consumer.
-- No production Node service, database, new public endpoint or Folio internals fork. Keep existing root-level relative links Pages-safe; nested Folio links use the configured Vite base.
-- Never publish filing ID documents, phone numbers, personal identity numbers or precise residential addresses. Publicly approved ICP/public-security website registration numbers are allowed in the legal footer.
-
-## Engineering and release
-
-- feat/* → dev → test → prod. main remains bootstrap.
-- Locked Node 24/npm build plus python3 scripts/check_site.py and generated output checks are T2; Mira Gate must remain meaningful.
-- Test preview is public GitHub Pages with all pages noindex and its real project base. Check browser and no-JS rendering (T4).
-- Prod deployment is **not** a build from source on the server. Existing mira-cloud-infra allowlist must be changed to the exact, verified _site/ artifact before the Folio candidate can promote. This cross-repo gate is mandatory. Keep rollback and verify actual public HTTPS (T5).
-- Existing site and its release pipeline stay untouched until the matching infra change is verified. Do not claim Folio is live from merely building or merging a PR.
+- Individual noncommercial website "党靖涛的记事本"; official production hostname `tomzlab.cn`. Do not fabricate entries, expose filing PII, or duplicate mother-site text.
+- Current owner-approved candidate: Folio controls root Header, Footer, Pearl theme, navigation, client router, and static site generation. Only home **content** is owned by consumer `SiteHome`; content copy lives in `site-content.ts`. Existing root HTML source is retired from this branch to avoid dual homepage truths.
+- Preserve existing `notes.html`, `weekly.html`, `projects.html`, `about.html` and original cross-site feed behavior. All navigation to legacy HTML must be a real full-document load, not a Folio router 404. No production database/server needed.
+- Folio dev candidate is not published to npm: use pinned dev SHA via temporary tarball for **test only**; do not call `npm ci` alone evidence of the new API. This Draft cannot promote before an audited Folio release and infra allowlist change.
+- Branches `feat/* → dev → test → prod`; `main` bootstrap. Never assume CI equals actual T4/T5. New homepage cannot deploy through the old raw source-file release workflow.

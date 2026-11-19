@@ -1,20 +1,18 @@
-# Domestic site deployment and acceptance
+# Folio consumer acceptance & publishing
 
-## Current reality
+## What this change owns
 
-tomzlab.cn has ICP approval, and the owner's public-security registration is 粤公网安备44020302000372号. The existing Alibaba Cloud Caddy site serves the static homepage and indexes; the independent production workflow in uichat-mira/mira-cloud-infra pins a tomzlab-web prod SHA, packages a hardcoded list of raw source files, and atomically swaps /srv/www/tomzlab.cn/current with rollback. **That workflow does not yet support Folio build output.**
+Folio dev `36547bd` provides the **real** Header, structured Footer, built-in Pearl and mobile interactions. The site supplies only `slots.home` / `headerBrand` and React text markup. Static `/` uses the same `SiteHome` component rendered under the actual public Folio Header and Footer, not a separately handwritten template. Core navigation and legal links live in `folio.config.ts`.
 
-## Folio candidate (not yet deployed)
+The current `prod` content at the time of design is the approved factual baseline. Legacy `notes.html`, `weekly.html`, `projects.html`, `about.html` and cross-site feed fallback remain unchanged. Existing page nav that points to legacy document routes is deliberately bridged to full-document navigation until those page bodies themselves are promoted into Folio.
 
-The first Folio consumer is intentionally isolated under /journal/. Root /, /notes.html, /weekly.html, /projects.html and /about.html remain stable. We use Folio's published 0.1.1 public API only; do not fork its CSS, runtime or Vite adapter. Real authored content must be reviewed before merging. External mother-site articles remain external links; do not silently duplicate them.
+## Verification
 
-Build with Node 24 and `npm ci && npm run build`; output is `_site/`, with nested /journal/index.html, article/index.html and Folio's static SEO metadata. Only this generated public directory may become a release artifact. Nothing in node_modules, folio-site source, workflows or private project paths belongs in the origin webroot.
+- T2: Node 24; checkout pinned Folio dev candidate + package build; site locked install and one nonpersistent tarball overlay; TS strict typecheck; production build; old route navigation checks; generated no-JS homepage and SEO checks.
+- T4: desktop/mobile Chromium screenshot, mobile menu (real Folio), native theme toggle, legacy route hard navigation, no-JS home body and Footer, and article HTML.
+- GitHub Pages test preview must set `TOMZLAB_SITE_BASE=/tomzlab-web/` and `TOMZLAB_PREVIEW=1`, plus mark legacy pages recursively noindex. It is **public**; do not place secrets. Direct /journal/ article links require site host to serve directory indexes.
+- T5 on authorized release: host HTTPS, assets, root page, links, 404, one legacy page, /journal/ and article paths, ICP & police registration. Do not equate prod branch merge with deployment.
 
-## Gates
+## Release blockers
 
-1. feat/* PR → dev: CI builds and checks both stable legacy entrypoints and Folio's server-visible static content, route, canonical and assets.
-2. dev → test: GitHub Pages preview at https://uichat-mira.github.io/tomzlab-web/. Use the project-base build for /journal and recursively add noindex/nofollow to every HTML page. Verify real desktop/mobile navigation and JS-disabled article reading (T4); this is public preview, not private storage.
-3. Before test → prod: update mira-cloud-infra deploy workflow to fetch the exact approved site prod commit, install locked npm dependencies on CI, build for /journal/, validate the generated artifact and package only `_site/`. Extend the site origin T5 to /journal/, a nested article, bundled assets, existing weekly page and both filings. Retain atomic rollback and site-scoped Caddy configuration.
-4. Do not interpret a CI-green PR, a prod branch merge, or a new Pages preview as a successful domestic deployment. Confirm the actual live hostname over HTTPS (T5) after authorized publishing.
-
-Do not alter DNS, reverse proxy, certificate handling or other services as a side-effect of the application migration.
+**No production change is authorized by this Draft.** Before promotion: Folio dev API must ship in reviewed npm version (package-lock updated from 0.1.1); mira-cloud-infra fixed-allowlist workflow must deploy only validated `_site/` after pinned build; official police filing icon needs approved asset. Keep rollback and validate existing Caddy. Do not silently change DNS or other services.

@@ -6,8 +6,8 @@ from urllib.parse import urlsplit, unquote
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ["index.html", "notes.html", "weekly.html", "projects.html", "about.html", "404.html"]
-NAV = PAGES[:-1]
+PAGES = ["notes.html", "weekly.html", "projects.html", "about.html"]
+NAV = ["index.html", *PAGES]
 
 class Links(HTMLParser):
     def __init__(self):
@@ -59,13 +59,12 @@ def main():
                 errors.append("missing Mira project documentation link")
             if "粤ICP备2026168682号-1" not in html or "粤公网安备44020302000372号" not in html or "备案信息（待核发）" in html:
                 errors.append(f"invalid ICP filing footer: {file}")
-            if file != "404.html":
-                expected_url = "https://tomzlab.cn/" if file == "index.html" else f"https://tomzlab.cn/{file}"
-                if f'<link rel="canonical" href="{expected_url}">' not in html:
-                    errors.append(f"missing or wrong canonical: {file}")
+            expected_url = f"https://tomzlab.cn/{file}"
+            if f'<link rel="canonical" href="{expected_url}">' not in html:
+                errors.append(f"missing or wrong canonical: {file}")
             if parsed.lang != "zh-CN" or not parsed.has_viewport or not parsed.has_title:
                 errors.append(f"missing base metadata: {file}")
-            if file != "404.html" and not parsed.has_description:
+            if not parsed.has_description:
                 errors.append(f"missing description: {file}")
             if set(NAV) - parsed.nav:
                 errors.append(f"missing navigation targets: {file}")
@@ -84,6 +83,12 @@ def main():
                         errors.append("missing Folio consumer for journal/")
                     continue
                 absolute = (ROOT / target).resolve()
+                if target == "index.html":
+                    continue  # Folio builds the root, no duplicate source
+                if target == "journal/":
+                    if not (ROOT / "folio-site" / "content").is_dir():
+                        errors.append("missing Folio journal source")
+                    continue
                 if not absolute.is_relative_to(ROOT) or not absolute.is_file():
                     errors.append(f"broken local link: {file} {href}")
         except (AssertionError, ValueError) as e:

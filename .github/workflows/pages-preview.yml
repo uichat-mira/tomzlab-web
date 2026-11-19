@@ -14,16 +14,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: uichat-mira/folio
+          ref: 36547bd4818d63268ae5e9d88f79e34861642e87
+          path: _folio_source
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
-      - name: Install locked Folio consumer
+      - name: Install locked consumer dependencies
         run: npm ci --no-audit --no-fund
-      - name: Build preview at Pages project subpath
-        env:
-          TOMZLAB_FOLIO_BASE: /tomzlab-web/journal/
+      - name: Build pinned Folio candidate
         run: |
+          cd _folio_source
+          npm ci --no-audit --no-fund
+          npm pack --workspace @uichat-mira/folio --pack-destination "$RUNNER_TEMP"
+      - name: Overlay dev candidate (no lockfile mutation)
+        run: npm install --no-save --package-lock=false --no-audit --no-fund "$RUNNER_TEMP/uichat-mira-folio-0.1.1.tgz"
+      - name: Build Pages preview
+        env:
+          TOMZLAB_SITE_BASE: /tomzlab-web/
+          TOMZLAB_PREVIEW: '1'
+        run: |
+          npm run typecheck
           npm run build
           python3 scripts/check_site.py
       - name: Mark every preview route noindex
