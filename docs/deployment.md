@@ -2,13 +2,19 @@
 
 ## 目标及路线
 
-当前候选直接消费 `uichat-mira/folio/dev@36547bd` 的公开 API。首页是唯一 `slots.home` 自定义正文；`/notes/`、`/weekly/`、`/projects/`、`/about/` 使用 Folio 统一解析的 `type: page`，`/journal/` 使用 Folio `collection` 和 `doc`。
+当前候选直接消费 `uichat-mira/folio/feat/folio-subscription-poc-20261119@c012ea6` 的公开 API。首页是唯一 `slots.home` 自定义正文；`/notes/`、`/weekly/`、`/projects/`、`/about/` 使用 Folio 统一解析的 `type: page`，`/journal/` 使用 Folio `collection` 和 `doc`。
 
 站点采用 Folio 原生 Header、Footer、搜索、Pearl、React Router、Markdown、SEO、404 和构建输出。**不要恢复原有四个 HTML 页面**，唯一允许的旧 URL 实体是 build 生成的 noindex redirect stub。
 
 项目与关于文案取自正式站 `prod@6a34c9fc`，不虚构新的项目或个人介绍。记录/见π周刊索引不搬运正文：`scripts/sync-source-index.py` 在构建期从两个可信 RSS 读取标题、摘要、日期和原站 URL，生成 `folio-site/content/notes/index.md` 与 `weekly/index.md`，再由 Folio 自动解析、渲染、生成静态 HTML。两文件被 gitignore 忽略，不应手工编辑。
 
 外部 RSS 的 fallback 是 `folio-site/snapshots/feed-fallback.json`，只在拉取失败时使用，且页面**必须清晰说明离线和快照日期**。不要把旧版 007 当成实时最新。确认页面真实包含母站 URL、构建版本和发行状态。
+
+## 外部 JSON 订阅 POC（未上线）
+
+国内官网 `SiteHome` 通过 Folio dev 公共 `useFolioJsonSubscription` Hook 运行时读取 `https://tomz.io/books/catalog.json`。服务端静态首页仍保持经采集的 `books-fallback.json`（2026-11-19），客户端每次挂载时重新校验并可每 5 分钟轮询，使用浏览器 HTTP 缓存语义。异常状态不抹掉已经呈现的书籍数据。已删除 `sync-books.py` HTML 书架爬虫，未复制任何正文。
+
+远端 JSON 是独立出版者 PR `dangjingtao/tomz-io#189` 的**候选**，尚未进入正式发布站。Folio Hook 来自 `uichat-mira/folio#195` 的功能分支，consumer CI 暂固定该分支精确 SHA，仅允许 Draft 验证，等 Folio 正式发布 npm 后再切换成发行包。浏览器双端口集成测试在 `8770` 发布 JSON、`8769` 预览消费站：验证 6 本 / 65 章；不重新构建消费者而仅更新 JSON 就能改变显示的篇章数 13 → 14；不兼容 Schema 退回日期化快照，390px/1440px 无横向溢出。本地端口配置绝不进入生产。
 
 ## 实际验证
 

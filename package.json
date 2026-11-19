@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev:folio": "vite --config folio-site/vite.config.ts",
-    "pretypecheck": "python3 scripts/sync-books.py",
-    "build": "node scripts/prepare-site.mjs && python3 scripts/sync-source-index.py && python3 scripts/sync-books.py && vite build --config folio-site/vite.config.ts && node scripts/write-legacy-redirects.mjs && node scripts/check-built-site.mjs",
+    "build": "node scripts/prepare-site.mjs && python3 scripts/sync-source-index.py && vite build --config folio-site/vite.config.ts && node scripts/write-legacy-redirects.mjs && node scripts/check-built-site.mjs",
     "typecheck": "tsc -p folio-site/tsconfig.json",
     "check:built": "node scripts/check-built-site.mjs"
   },

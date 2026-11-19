@@ -6,7 +6,7 @@
 
 | Route | 页面来源 | 页面渲染 |
 | --- | --- | --- |
-| `/` | `site-content.ts` 的生产首页文字 + SVG 笔记本；构建时从 tomz.io 书架采集封面、标题和入口 | `FolioApp` + `slots.home`，静态首页复用 `SiteHome` |
+| `/` | `site-content.ts` 的生产首页文字 + SVG 笔记本；Folio dev 在浏览器中消费 tomz.io 公共书架 JSON；首屏带静态快照 | `FolioApp` + `slots.home`，静态首页复用 `SiteHome` |
 | `/notes/` | 构建时从 `tomz.io/rss.xml` 和 `mira.tomz.io/blogs/feed.xml` 取最近文章及原文链接 | Folio 原生 `type: page` Markdown |
 | `/weekly/` | 构建时从母站 RSS 提取真实期数的封面 URL（最多 12 期） | Folio 原生 `type: page` Markdown |
 | `/projects/` | 正式站生产分支的四个项目与原始链接 | Folio 原生 `type: page` Markdown |
@@ -15,7 +15,7 @@
 
 外部作者与原文仍由各自站点负责。Folio 的 `CollectionIndex / EntryList` 默认链接站内文档，因此不能伪造一组本地 Article 来承接母站 RSS；这里采用**仅生成 Markdown 外链索引**的适配层，不引入第二套 React 页面或 DOM 渲染器。
 
-首页书架不另建本地书籍正文：`scripts/sync-books.py` 在构建时读取 `https://tomz.io/books/` 的公开封面与书籍链接，生成被忽略的 `books.generated.json`，Folio 首页 `slots.home` 只负责展示一排封面及跳转。离线时回退到有采集日期的 `snapshots/books-fallback.json` 并在页面标注。书封图直接引用 tomz.io / assets.tomz.io 公共地址，不提交或篡改原图。
+首页书架由 Folio dev 的 `useFolioJsonSubscription` 运行时订阅 `https://tomz.io/books/catalog.json`，消费者只提供严格 Schema 校验、静态快照以及封面视觉。网络失败保留注明 2026-11-19 的 `snapshots/books-fallback.json`；成功收到更新则无需重建国内官网。篇章标题、数量和 URL 来自生产书籍 `CollectionPage / ItemList` 派生的同一份 JSON，不复制原文，也不继续抓取 HTML。书封直接使用 tomz.io 或 assets.tomz.io 的公共地址。发布者接口未正式部署前，默认生产 URL 会返回 404 并保持快照；**跨仓库订阅只在隔离本地端口完成端到端验证，不能宣称线上生效**。
 
 旧 `*.html` 链接会自动重定向到新路由，仅留下构建时生成的 noindex 兼容页。原来的 HTML 主页/栏目、feed-sync.js、nav.js 和 site.css 已从消费候选删除，不再拥有站点功能。
 
@@ -27,7 +27,7 @@
 npm ci --no-audit --no-fund
 git clone https://github.com/uichat-mira/folio.git /tmp/folio-consumer-source
 cd /tmp/folio-consumer-source
-git checkout 36547bd4818d63268ae5e9d88f79e34861642e87
+git checkout c012ea6d1d995dd1c18c75855b7e9a4a8e8d1b74
 npm ci --no-audit --no-fund
 npm pack --workspace @uichat-mira/folio --pack-destination /tmp
 cd /path/to/tomzlab-web
@@ -38,10 +38,12 @@ python3 scripts/check_site.py
 python3 -m http.server 8768 --directory _site
 ```
 
-`npm run build` 会同步 RSS 及 tomz.io 的书架封面目录、生成 Folio Markdown 数据页、执行 Vite/Folio 静态输出、写入旧 URL 跳转和校验产物。获取不到 RSS 时使用显式注明**2026 年 10 月**来源的生产快照，不伪称是最新文章。也可以指定 `TOMZLAB_FEED_MODE=offline`（也控制书架）测试回退，或者 `required` 要求真实 RSS，失败则构建失败。
+`npm run build` 在构建时同步文章 RSS，并生成 Folio Markdown 索引页、静态输出和旧 URL 跳转；书架目录由 Folio 在浏览器运行时订阅，静态首屏只使用已验证快照。获取不到 RSS 时使用显式注明**2026 年 10 月**来源的生产快照，不伪称是最新文章。也可以指定 `TOMZLAB_FEED_MODE=offline`（不控制书架订阅）测试回退，或者 `required` 要求真实 RSS，失败则构建失败。
 
 ## 发布限制
 
 这是 Draft 消费者验证，**没有发布生产**。当前 Folio 0.1.1 不含本项目消费的完整 dev API；必须先验收与发布新版包，才可调整 lockfile。生产发布仓库 `mira-cloud-infra` 也必须适配 `_site/` 构建结果并保留原子回滚。
 
 已发现的 Folio 本体缺口：默认静态生成的**非首页**页面含 Markdown 正文、canonical、sitemap 和 robots 信息，却**不包含完整的 Header/Footer**；在 React 加载后才有完整外壳。站点消费层不伪造第二套页面外壳，详见 `docs/deployment.md`。
+
+本地跨域联调可以使用 `VITE_TOMZLAB_BOOK_CATALOG_URL=http://127.0.0.1:8770/books/catalog.json` 构建消费者，出版者在 8770 提供 CORS JSON。此变量只属于隔离测试构建，绝不用于生产部署。

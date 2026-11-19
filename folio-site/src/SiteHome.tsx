@@ -1,10 +1,17 @@
 import { Link } from "react-router-dom";
 import { siteHomeCopy as copy } from "./site-content";
 import { NotebookIllustration } from "./NotebookIllustration";
-import catalog from "./books.generated.json";
+import { useFolioJsonSubscription } from "@uichat-mira/folio";
+import { bookCatalogUrl, bookSnapshotDate, initialBookCatalog, isBookCatalog } from "./book-subscription";
 
 /** Consumer-owned home body. Folio still owns Header, Footer, theme, routes and mobile navigation. */
 export function SiteHome() {
+  const { data: catalog, status: bookStatus } = useFolioJsonSubscription({
+    url: bookCatalogUrl,
+    initialData: initialBookCatalog,
+    validate: isBookCatalog,
+    refreshMs: 300_000,
+  });
   const splitAt = copy.lede.indexOf("。");
   const ledeFirst = copy.lede.slice(0, splitAt + 1);
   const ledeSecond = copy.lede.slice(splitAt + 1);
@@ -52,14 +59,14 @@ export function SiteHome() {
         </div>
         <div className="site-home__book-list" aria-label="来自 tomz.io 的书籍">
           {catalog.books.map((book) => (
-            <a className="site-home__book" key={book.url} href={book.url} target="_blank" rel="noopener noreferrer">
-              <img src={book.cover} alt={book.alt} loading="lazy" decoding="async" width="200" height="267" />
+            <a className="site-home__book" key={book.url} href={book.url} data-entry-count={book.entryCount} target="_blank" rel="noopener noreferrer">
+              {book.cover ? <img src={book.cover} alt={`《${book.title}》封面`} loading="lazy" decoding="async" width="200" height="267" /> : null}
               <span>{book.title}</span>
             </a>
           ))}
         </div>
-        {catalog.status === "snapshot" && (
-          <p className="site-home__books-status">书架更新暂不可用，这里展示 {catalog.snapshotDate} 的索引快照。</p>
+        {bookStatus !== "fresh" && (
+          <p className="site-home__books-status">{bookStatus === "stale" ? "书架订阅暂不可用" : "正在检查书架订阅"}；当前展示 {bookSnapshotDate} 的书目快照。</p>
         )}
       </section>
       <section className="site-home__about" aria-labelledby="site-home-about">
