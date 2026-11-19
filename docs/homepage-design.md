@@ -1,45 +1,30 @@
-# tomzlab.cn 首页改版 · 视觉与接入说明
+# tomzlab.cn 首页设计候选 · Folio Pearl
 
-> 设计候选，非已部署产物。内容依据 `uichat-mira/tomzlab-web` 的 `prod` 分支（Git tree SHA `6a34c9fc69f8456bb01a416fc538a88604ef8745`）。Folio 能力依据 `uichat-mira/folio` 当前 `dev` 已公开的 React Slots、Build Adapter 和静态构建文档。预览不代表产品验收。
+**内容唯一基线**：`uichat-mira/tomzlab-web` `prod@6a34c9fc`，不引入新文章、不改写生产文案、不把 `tomz.io` 和 `mira.tomz.io` 的外站内容复制过来。
 
-## 定位与原则
+**主题唯一基线**：`uichat-mira/folio` `dev` 的 `packages/folio/src/core/appearance.ts` 与 `packages/folio/src/styles.css`。正式接入时须从 `@uichat-mira/folio/styles.css` 导入原生样式，配置 `appearance: { preset: 'pearl', scheme: 'system' }`；不再自建第二套“珍珠白”主题。独立 HTML 设计稿为方便手机离线预览，内嵌对应版本 Pearl 语义 Token 的静态快照，并非已经运行 FolioApp。
 
-站名、主标语、简介、文章标题、摘要、周刊、四个项目及「这个站」全文均以国内官网生产 HTML 为内容依据。**网站仍然是一座长期可访问的个人入口**，不是拷贝 `tomz.io` 的博客，也不创造本站不存在的全文或订阅承诺。
+## 首页内容收敛
 
-### 视觉
+1. **Header**：生产站 Logo、导航：首页 / 记录 / 周刊 / 项目 / 关于。
+2. **Hero**：生产站名、原本英文副标题、原本「写一点生活，记一点工作……」原句；「翻开记事本」「关于这里」两个操作。
+3. **从这里开始**：只保留生产首页已有的「记录与文字」「项目与实验」两条入口，各自引用原文案。
+4. **见π 周刊**：一条轻量入口，无过期的“最新一期”、无复制目录。
+5. **这个站**：原生产首页全文、末尾「希望十年后它还在。不管我在不在。」原句。
+6. **Footer**：独立官网、母站、工程站与备案号；公安备案标识图片仍须采用官方资源。
 
-- 珍珠白 `#fbfaf7`；中文衬线强调个人叙事；内容正文保持干净的无衬线。
-- 主视觉是根据生产首页原有 notebook 意象精炼的纸页，不引用新图或假封面。
-- 尽可能避免整页卡片：目录、作品、文字以表格化序号和细线建立层级；只有首屏保留纸页形态。
-- 首页小屏单栏阅读，保留完整主标语、四个项目、外部来源和页脚备案，不因手机宽度隐藏内容。
+不在首页堆三篇生活、三篇工程、四个项目、期刊封面和额外介绍。它们各有独立栏目，首页只负责让访客找到方向。
 
-## 信息架构
+## Folio 组合与静态构建
 
-1. Header：`tomzlab.cn` 生产图形标识；首页 / 记录 / 周刊 / 项目 / 关于。
-2. 主视觉：**党靖涛的记事本**、`Personal notes, projects & experiments.`、生产原句「写一点生活……」。
-3. **最近的记录**：生产 `notes.html` 的三篇生活长文，来源明确标为 `TOMZ.IO`；保留原文链接。
-4. **见π 周刊**：生产 `weekly.html` 的 `007` 为静态回退示例，正文仍由母站提供；明确「周刊目录」站内入口。
-5. **工程与产品**：生产 `notes.html` 的三条 `mira.tomz.io` 文章，不假装为本站全文。
-6. **做出来的东西**：生产 `projects.html` 的 UIChat Mira / Mira Mobile / ComDesign / UIChat，保持原有文字及目标链接。
-7. **这个站**：保持生产首页的完整角色边界与「没有广告……」原句，最后以「希望十年后它还在……」作结。
-8. Footer：母站、工程站、联系地址、备案。ICP 末尾 `-1` 和公安备案查询链来自最新备案信息，应经上游权威文件核对后再上线；公安平台备案图标需使用官方素材，不能自制。
+- `FolioApp` 消费站：`appearance.preset = 'pearl'`，通过 `slots.home` 定制官网首页，通过 Folio 原生 `headerBrand` 和 `footer` 处理品牌与法律信息。
+- 对应 `staticRoutes.home` 与 React `slots.home` 必须共用同一份生产内容数据；仅改 React 的页面不算 SEO 交付。
+- Folio `docs` 只纳入本站审核过的 Markdown。原有站外记录和周刊保持真实来源链接，保留 `notes.html` 等稳定 URL 和源站 feed 同步逻辑。
+- 此 PR 为**视觉设计稿**，不是完整 Folio 消费者实施；不变更 `prod` 或基础设施发布流程。
 
-## Folio 运行机制
+## 验收
 
-- **UI**：使用 `FolioApp` 的 `slots.home` 注入门户首页，`headerBrand` 接入生产标识，`footer` 统一合法页脚；`ui.theme` 可开启主题切换。
-- **内容**：主首页属于站点主导的 portal 页面，不强行建成 `article`；局部索引可以继续读取已有跨站 feed，**失败保持生产代码中已有的三条静态回退**。Folio `docs` 仅存放本站自主发布、审核过的 Markdown。
-- **搜索**：若没有足够本站 `docs`，不显示只搜索本地 Markdown 的全站搜索按钮，以免让访客误以为它能搜索 `tomz.io` 和 `mira.tomz.io`。
-- **构建**：`slots.home` 只影响 React，不生成服务器可见 HTML。对应的 `staticRoutes.home` 必须使用**同一份内容数据和结构**输出 HTML、canonical、description 和真实正文。不得维护两份独立文案。
-- **发布**：先在独立候选分支验证，根路径稳定后，再调整独立 `mira-cloud-infra` 的 `_site` 产物打包逻辑；不直接更改 Caddy 或 `prod`。
-
-## 验收重点
-
-- 390 px 手机屏和 1440 px 桌面：无横向滚动，header 可达，文章标题没有截断。
-- 无 JavaScript 时保留主视觉文字、全部栏目和项目真实链接。
-- 访客点击外站文章，能明确知道跳到原站；失败 feed 不导致空白。
-- SEO canonical、站点地图、公安备案和 ICP 不冲突。
-- 运行时 React 与静态 HTML 采用同一个数据源；不能出现上线版本内容与页面不一致。
-
-## 本候选的边界
-
-`tomzlab-homepage-preview.html` 是可离线检查结构的单页视觉原型，**并非已经挂载 Folio Runtime 的完整应用**，也不代表本次修改了 GitHub 仓库或生产网站。它用于让用户先审阅实际布局与文案，再进行 Folio 消费者工程实现。
+- 390px 手机和 1440px 桌面均无横向滚动。
+- 本机 Chrome 能渲染、折叠菜单和主题切换能运行，无 JS 仍可读核心内容。
+- 所有导航和外链有真实目标；备案编号正确；项目/文章未虚构。
+- 实际 Folio Runtime 和静态 HTML 一致性将在工程接入后验收。
