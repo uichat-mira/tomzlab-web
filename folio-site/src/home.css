@@ -4,8 +4,7 @@
 }
 .site-home{width:min(var(--site-max),calc(100% - 64px));margin-inline:auto;color:var(--folio-ink)}
 .site-home__kicker,.site-home__section-heading span,.site-home__entry-label,
-.site-home__eyebrow,.site-home__closing small,.site-home__paper,
-.site-home__paper small{font:11px/1.7 var(--folio-font-mono);letter-spacing:.065em;color:var(--folio-muted)}
+.site-home__eyebrow,.site-home__closing small{font:11px/1.7 var(--folio-font-mono);letter-spacing:.065em;color:var(--folio-muted)}
 .site-home__kicker:before{content:"";display:inline-block;width:5px;height:5px;background:var(--folio-brand-accent);border-radius:50%;margin-right:14px;vertical-align:middle}
 .site-home__hero{min-height:550px;padding:96px 0 84px;display:grid;grid-template-columns:1.35fr .65fr;align-items:center;gap:55px}
 .site-home__hero h1{font:400 clamp(42px,5vw,69px)/1.28 var(--folio-font-reading-heading);letter-spacing:-.045em;margin:26px 0 10px}
@@ -16,12 +15,8 @@
 .site-home__primary{background:var(--folio-primary);color:var(--folio-on-primary);padding:13px 20px;display:inline-flex;align-items:center;justify-content:space-between;gap:22px;min-height:46px;border-radius:var(--folio-radius-sm)}
 .site-home__primary:hover{background:var(--folio-primary-active)}
 .site-home__about-link{border-bottom:1px solid var(--folio-hairline);padding-bottom:5px;color:var(--folio-body)}
-.site-home__notebook{height:310px;display:flex;justify-content:center;align-items:center}
-.site-home__paper{width:200px;height:250px;background:var(--folio-surface-card);border:1px solid var(--folio-hairline);box-shadow:8px 10px 0 var(--folio-surface-soft),9px 22px 28px #13130e08;transform:rotate(3deg);padding:24px;display:flex;flex-direction:column}
-.site-home__paper>span{display:flex;justify-content:space-between}
-.site-home__paper i{border-top:1px solid var(--folio-hairline);display:block;margin-top:25px}
-.site-home__paper i:nth-of-type(2){width:85%}.site-home__paper i:nth-of-type(3){width:68%}
-.site-home__paper small{margin-top:auto}
+.site-home__notebook{height:355px;display:flex;justify-content:center;align-items:center}
+.site-home__notebook-art{width:min(100%,325px);height:auto;overflow:visible;filter:none}
 .site-home__section{padding:55px 0 65px;border-top:1px solid var(--folio-hairline)}
 .site-home__section-heading{display:flex;justify-content:space-between;align-items:end;margin-bottom:28px}
 .site-home__section-heading h2,.site-home__about h2{font:400 28px/1.4 var(--folio-font-reading-heading);margin:8px 0 0}

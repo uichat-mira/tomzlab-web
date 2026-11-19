@@ -25,6 +25,11 @@ for(const expected of [
 const base = (process.env.TOMZLAB_SITE_BASE || "/").replace(/^\/+|\/+$/g, "");
 const expectedArticleUrl = `https://tomzlab.cn/${base ? base + "/" : ""}journal/notes/this-site/`;
 if(!sitemap.includes(expectedArticleUrl)) throw new Error("Folio article missing from sitemap");
+// The notebook must stay a real vector in both hydrated and no-JS home HTML.
+for (const token of ['<svg', 'site-home__notebook-art', 'notebook-grain', 'NOTES / 001']) {
+  if (!html.includes(token)) throw new Error('Vector notebook lost from static homepage: ' + token);
+}
+if (html.includes('site-home__paper')) throw new Error('Deprecated CSS notebook remains in static homepage');
 if(!sitemap.includes("https://tomzlab.cn/notes.html")) throw new Error("Legacy entries missing from sitemap");
 if(!article.includes("从门牌到阅读空间"))throw new Error("Folio content not server readable");
 console.log("PASS Folio header/footer + Pearl home SSR + legacy routes + canonical/sitemap");

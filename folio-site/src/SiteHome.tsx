@@ -1,4 +1,5 @@
 import { siteHomeCopy as copy } from "./site-content";
+import { NotebookIllustration } from "./NotebookIllustration";
 
 /** Consumer-owned home body. Folio still owns Header, Footer, theme, routes and mobile navigation. */
 export function SiteHome({ basePath = "/" }: { basePath?: string }) {
@@ -19,11 +20,7 @@ export function SiteHome({ basePath = "/" }: { basePath?: string }) {
           </div>
         </div>
         <div className="site-home__notebook" aria-hidden="true">
-          <div className="site-home__paper">
-            <span>TOMZLAB.CN <span>2026</span></span>
-            <i/><i/><i/>
-            <small>NOTES / 001</small>
-          </div>
+          <NotebookIllustration />
         </div>
       </section>
       <section className="site-home__section" aria-labelledby="site-home-entries">
