@@ -66,7 +66,7 @@ export function SiteHome() {
           ))}
         </div>
         {bookStatus !== "fresh" && (
-          <p className="site-home__books-status">{bookStatus === "stale" ? "书架订阅暂不可用" : "正在检查书架订阅"}；当前展示 {bookSnapshotDate} 的书目快照。</p>
+          <p className="site-home__books-status">{bookStatus === "stale" ? "书架订阅暂不可用" : "书架索引快照"}；当前展示 {bookSnapshotDate} 的书目快照。</p>
         )}
       </section>
       <section className="site-home__about" aria-labelledby="site-home-about">
