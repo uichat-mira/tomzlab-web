@@ -1,36 +1,61 @@
 import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const dir = path.join(root, "_site");
-for (const item of [
-  "index.html", "notes.html", "weekly.html", "projects.html", "about.html",
-  "assets/icons/logo.svg", "assets/css/site.css",
-  "journal/index.html", "journal/notes/this-site/index.html",
-  "sitemap.xml",
-]) {
-  const f = path.join(dir, item);
-  if (!(await stat(f)).isFile()) throw new Error("Missing built file: "+item);
+const out = path.join(root, "_site");
+const baseName = (process.env.TOMZLAB_SITE_BASE || "/").replace(/^\/+|\/+$/g, "");
+const base = baseName ? "/" + baseName + "/" : "/";
+const site = "https://tomzlab.cn";
+async function file(name) {
+  const p = path.join(out, name);
+  if (!(await stat(p)).isFile()) throw new Error("Missing Folio output: " + name);
+  return readFile(p, "utf8");
 }
-const html = await readFile(path.join(dir, "index.html"), "utf8");
-const article = await readFile(path.join(dir, "journal/notes/this-site/index.html"), "utf8");
-const sitemap = await readFile(path.join(dir, "sitemap.xml"), "utf8");
-for(const expected of [
-  "党靖涛的记事本", "希望十年后它还在。不管我在不在。",
-  'class="folio-header', "folio-footer--structured",
-  'data-folio-preset="pearl"', "粤ICP备2026168682号-1",
-  "粤公网安备44020302000372号", "记录与文字", "项目与实验",
-  'rel="canonical"',
-]) if(!html.includes(expected))throw new Error("Missing Folio homepage contract: "+expected);
-const base = (process.env.TOMZLAB_SITE_BASE || "/").replace(/^\/+|\/+$/g, "");
-const expectedArticleUrl = `https://tomzlab.cn/${base ? base + "/" : ""}journal/notes/this-site/`;
-if(!sitemap.includes(expectedArticleUrl)) throw new Error("Folio article missing from sitemap");
-// The notebook must stay a real vector in both hydrated and no-JS home HTML.
-for (const token of ['<svg', 'site-home__notebook-art', 'folio-notebook-paper', 'NOTES / 001']) {
-  if (!html.includes(token)) throw new Error('Vector notebook lost from static homepage: ' + token);
+function mustContain(value, items, page) {
+  for (const item of items) if (!value.includes(item))
+    throw new Error(page + " missing " + JSON.stringify(item));
 }
-if (html.includes('feTurbulence')) throw new Error('Photorealistic paper-grain filter must not return');
-if (html.includes('site-home__paper')) throw new Error('Deprecated CSS notebook remains in static homepage');
-if(!sitemap.includes("https://tomzlab.cn/notes.html")) throw new Error("Legacy entries missing from sitemap");
-if(!article.includes("从门牌到阅读空间"))throw new Error("Folio content not server readable");
-console.log("PASS Folio header/footer + Pearl home SSR + legacy routes + canonical/sitemap");
+const pages = {
+  "index.html": ["党靖涛的记事本", "希望十年后它还在。不管我在不在。", "site-home__notebook-art", "<svg", "folio-notebook-paper"],
+  "notes/index.html": ["<h1>记录</h1>", "生活与长文", "工程与产品", "https://tomz.io/blogs/", "https://mira.tomz.io/blogs/"],
+  "weekly/index.html": ["<h1>见π 周刊</h1>", "https://tomz.io/weekly/"],
+  "projects/index.html": ["<h1>项目</h1>", "UIChat Mira", "UIChat Mira Mobile", "ComDesign", "UIChat"],
+  "about/index.html": ["<h1>关于这里</h1>", "你好，我是党靖涛", "hello@tomz.io"],
+  "journal/index.html": ["阅读空间"],
+  "journal/notes/this-site/index.html": ["从门牌到阅读空间", "非经营性的个人网站"],
+};
+for (const [name, fragments] of Object.entries(pages)) {
+  const page = await file(name);
+  mustContain(page, [...fragments,
+    'lang="zh-CN"', 'data-folio-preset="pearl"', 'rel="canonical"',
+    'name="description"', 'name="viewport"'
+  ], name);
+  if (page.includes("assets/js/feed-sync.js") || page.includes("assets/css/site.css"))
+    throw new Error("Legacy page runtime leaked into " + name);
+  const slug = name === "index.html" ? "" : name.replace(/index\.html$/, "");
+  mustContain(page, ['href="' + site + base + slug + '"'], "canonical " + name);
+}
+const home = await file("index.html");
+mustContain(home, ["folio-header", "folio-footer--structured",
+  "粤ICP备2026168682号-1", "粤公网安备44020302000372号", "NOTES / 001"], "home");
+if (home.includes("feTurbulence") || home.includes("site-home__paper"))
+  throw new Error("Notebook must stay Pearl-compatible flat vector");
+for (const slug of ["notes", "weekly", "projects", "about"]) {
+  const redirect = await file(slug + ".html");
+  mustContain(redirect, ['content="noindex,follow"', 'url=' + base + slug + '/',
+    'href="' + base + slug + '/"', 'rel="canonical"'], slug + ".html");
+  if (redirect.includes("folio-markdown") || redirect.includes("site-header"))
+    throw new Error("Legacy alias contains a duplicate page body: " + slug);
+}
+const xml = await file("sitemap.xml");
+for (const slug of ["", "notes/", "weekly/", "projects/", "about/", "journal/"]) {
+  mustContain(xml, ["<loc>" + site + base + slug + "</loc>"], "sitemap.xml");
+}
+await file("404.html");
+await file("assets/icons/logo.svg");
+await file("assets/icons/favicon.svg");
+if (process.env.TOMZLAB_PREVIEW === "1")
+  for (const name of Object.keys(pages))
+    mustContain(await file(name), ['content="noindex,nofollow"'], name);
+console.log("PASS Folio native routes, Pearl home, publisher links, redirects, sitemap, SEO and no-JS bodies");

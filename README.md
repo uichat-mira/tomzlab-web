@@ -1,21 +1,45 @@
-# 党靖涛的记事本 · tomzlab.cn
+# 党靖涛的记事本 · Folio dev 消费站
 
-个人非经营性网站。首页以 Folio dev candidate 作为原生站点外壳：Folio Header、Footer、移动菜单、主题、React Router 和 Pearl 主题均归 Folio；只有首页主体由消费站拥有。旧链接和内容均来自 **tomzlab-web/prod**，未复制母站全文。
+`tomzlab.cn` 是个人非经营性网站。本分支用于**真实验证 Folio dev 的完整站点能力**：Folio 提供原生 Header、Footer、Pearl、搜索、文章/页面阅读与静态构建；本站只定制首页 `SiteHome` 和品牌。
 
-## Single ownership
+## 页面及内容所有权
 
-- `folio-site/src/SiteHome.tsx`：唯一首页 React 组件；`site-content.ts`：唯一首页文本；`src/static-home.tsx` 使用同一组件与公开 Folio Header/Footer 生成静态 HTML。
-- `folio-site/folio.config.ts`：唯一导航、Pearl、Footer 与备案配置；React 与静态构建共用。
-- `notes.html`、`weekly.html`、`projects.html`、`about.html`：原有稳定文档、真实 feed 逻辑，保持原路径与内容。
-- `folio-site/content/`：本站独立的 Git Markdown；Folio 负责 `/journal/` 与静态内容输出。
-- `_site/`：唯一构建输出；不提交 node_modules，生产主机不执行 npm。
+| Route | 页面来源 | 页面渲染 |
+| --- | --- | --- |
+| `/` | `site-content.ts` 的生产首页文字 + SVG 笔记本 | `FolioApp` + `slots.home`，静态首页复用 `SiteHome` |
+| `/notes/` | 构建时从 `tomz.io/rss.xml` 和 `mira.tomz.io/blogs/feed.xml` 取最近文章及原文链接 | Folio 原生 `type: page` Markdown |
+| `/weekly/` | 构建时从母站 RSS 提取真实期数的封面 URL（最多 12 期） | Folio 原生 `type: page` Markdown |
+| `/projects/` | 正式站生产分支的四个项目与原始链接 | Folio 原生 `type: page` Markdown |
+| `/about/` | 正式站生产分支的介绍、联系与非经营声明 | Folio 原生 `type: page` Markdown |
+| `/journal/` | 本站自有 Git Markdown | Folio 原生 `collection` + `doc` |
 
-## Candidate setup
+外部作者与原文仍由各自站点负责。Folio 的 `CollectionIndex / EntryList` 默认链接站内文档，因此不能伪造一组本地 Article 来承接母站 RSS；这里采用**仅生成 Markdown 外链索引**的适配层，不引入第二套 React 页面或 DOM 渲染器。
 
-Folio 目前在 dev 存在尚未发布到 npm 0.1.1 的 Header/Footer/Slots API。**此分支只是可审阅候选，不可直接晋级 prod**。CI 精确拉取 dev commit `36547bd4818d63268ae5e9d88f79e34861642e87`、打包后覆盖安装在 npm 0.1.1 上，直到 Folio 新版经过独立发布验证。
+旧 `*.html` 链接会自动重定向到新路由，仅留下构建时生成的 noindex 兼容页。原来的 HTML 主页/栏目、feed-sync.js、nav.js 和 site.css 已从消费候选删除，不再拥有站点功能。
 
-局部运行：Node 24，`npm ci`，在 Folio dev worktree 中 `npm ci && npm pack --workspace @uichat-mira/folio`，然后本站 `npm install --no-save --package-lock=false /path/to/folio-dev.tgz`、`npm run typecheck && npm run build`；`python3 -m http.server --directory _site 8768`。
+## 本地验证
 
-## Release block
+需要 Node 24、Python 3 和 curl。Folio dev API 尚未正式发布，暂用精确 commit 打包：
 
-当前 mira-cloud-infra 的生产发布脚本仍只打包旧的静态根文件清单；它不会发布 Folio Vite build。因此在修改并独立验证它对 `_site/` 的 allowlist/固定 SHA/原子回滚之前 **不得晋级 test → prod**。本站历史旧根 HTML 已从新构建源中移除；开发者不得把旧 `index.html` 当 Folio 官网真相。
+```sh
+npm ci --no-audit --no-fund
+git clone https://github.com/uichat-mira/folio.git /tmp/folio-consumer-source
+cd /tmp/folio-consumer-source
+git checkout 36547bd4818d63268ae5e9d88f79e34861642e87
+npm ci --no-audit --no-fund
+npm pack --workspace @uichat-mira/folio --pack-destination /tmp
+cd /path/to/tomzlab-web
+npm install --no-save --package-lock=false /tmp/uichat-mira-folio-0.1.1.tgz
+npm run typecheck
+npm run build
+python3 scripts/check_site.py
+python3 -m http.server 8768 --directory _site
+```
+
+`npm run build` 会同步 RSS、生成 Folio Markdown 数据页、执行 Vite/Folio 静态输出、写入旧 URL 跳转和校验产物。获取不到 RSS 时使用显式注明**2026 年 10 月**来源的生产快照，不伪称是最新文章。也可以指定 `TOMZLAB_FEED_MODE=offline` 测试回退，或者 `required` 要求真实 RSS，失败则构建失败。
+
+## 发布限制
+
+这是 Draft 消费者验证，**没有发布生产**。当前 Folio 0.1.1 不含本项目消费的完整 dev API；必须先验收与发布新版包，才可调整 lockfile。生产发布仓库 `mira-cloud-infra` 也必须适配 `_site/` 构建结果并保留原子回滚。
+
+已发现的 Folio 本体缺口：默认静态生成的**非首页**页面含 Markdown 正文、canonical、sitemap 和 robots 信息，却**不包含完整的 Header/Footer**；在 React 加载后才有完整外壳。站点消费层不伪造第二套页面外壳，详见 `docs/deployment.md`。

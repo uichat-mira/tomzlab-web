@@ -1,8 +1,9 @@
+import { Link } from "react-router-dom";
 import { siteHomeCopy as copy } from "./site-content";
 import { NotebookIllustration } from "./NotebookIllustration";
 
 /** Consumer-owned home body. Folio still owns Header, Footer, theme, routes and mobile navigation. */
-export function SiteHome({ basePath = "/" }: { basePath?: string }) {
+export function SiteHome() {
   const splitAt = copy.lede.indexOf("。");
   const ledeFirst = copy.lede.slice(0, splitAt + 1);
   const ledeSecond = copy.lede.slice(splitAt + 1);
@@ -15,8 +16,8 @@ export function SiteHome({ basePath = "/" }: { basePath?: string }) {
           <p className="site-home__english" lang="en">{copy.english}</p>
           <p className="site-home__lede">{ledeFirst}<span>{ledeSecond}</span></p>
           <div className="site-home__actions">
-            <a className="site-home__primary" href={basePath + "notes.html"}>翻开记事本 <span aria-hidden="true">↗</span></a>
-            <a className="site-home__about-link" href={basePath + "about.html"}>关于这里 <span aria-hidden="true">→</span></a>
+            <Link className="site-home__primary" to="/notes">翻开记事本 <span aria-hidden="true">↗</span></Link>
+            <Link className="site-home__about-link" to="/about">关于这里 <span aria-hidden="true">→</span></Link>
           </div>
         </div>
         <div className="site-home__notebook" aria-hidden="true">
@@ -29,18 +30,18 @@ export function SiteHome({ basePath = "/" }: { basePath?: string }) {
         </div>
         <div className="site-home__entries">
           {copy.entries.map((entry) => (
-            <a className="site-home__entry" key={entry.id} href={basePath + entry.url}>
+            <Link className="site-home__entry" key={entry.id} to={entry.url}>
               <span className="site-home__entry-label">{entry.id}<b aria-hidden="true">↗</b></span>
               <h3>{entry.title}</h3>
               <p>{entry.description}</p>
               <span className="site-home__entry-action">{entry.action} →</span>
-            </a>
+            </Link>
           ))}
         </div>
-        <a className="site-home__weekly" href={basePath + "weekly.html"}>
+        <Link className="site-home__weekly" to="/weekly">
           <strong>{copy.weekly}</strong><span>{copy.weeklyDescription}</span>
           <span>前往周刊 ↗</span>
-        </a>
+        </Link>
       </section>
       <section className="site-home__about" aria-labelledby="site-home-about">
         <span className="site-home__eyebrow">COLOPHON</span>

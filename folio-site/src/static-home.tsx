@@ -27,7 +27,7 @@ export function renderStaticSiteHome(context: FolioStaticBuildContext): string {
         shareEnabled: false,
       }),
       createElement("div", { className: "folio-content" },
-        createElement(SiteHome, { basePath }),
+        createElement(SiteHome),
         createElement(FolioFooter, { footer: context.config.footer, siteTitle: context.config.title }),
       ),
     ),
@@ -35,8 +35,12 @@ export function renderStaticSiteHome(context: FolioStaticBuildContext): string {
   // JavaScript-disabled mobile visitors still get an immediately accessible
   // navigation row even though the interactive header's drawer cannot open.
   const staticBody = renderToStaticMarkup(tree);
-  const nav = ['index.html','notes.html','weekly.html','projects.html','about.html'];
-  const labels = ['首页','记录','周刊','项目','关于'];
-  const links = nav.map((page, i) => '<a href="' + basePath + page + '">' + labels[i] + '</a>').join("");
+  // Keep the no-JS fallback derived from the same Folio navigation config.
+  const links = (context.config.navigation ?? [])
+    .filter((item) => item.href && item.href.startsWith("/"))
+    .map((item) => renderToStaticMarkup(createElement("a", {
+      href: basePath + item.href!.replace(/^\/+/, ""),
+    }, item.label)))
+    .join("");
   return staticBody.replace("</header>", "</header><noscript><nav class=\"site-nojs-nav\" aria-label=\"无脚本导航\">" + links + "</nav></noscript>");
 }

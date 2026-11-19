@@ -8,10 +8,10 @@ export default defineFolioConfig({
   logo: "assets/og.png",
   navigation: [
     { label: "首页", href: "/" },
-    { label: "记录", href: "/notes.html" },
-    { label: "周刊", href: "/weekly.html" },
-    { label: "项目", href: "/projects.html" },
-    { label: "关于", href: "/about.html" },
+    { label: "记录", href: "/notes" },
+    { label: "周刊", href: "/weekly" },
+    { label: "项目", href: "/projects" },
+    { label: "关于", href: "/about" },
   ],
   collections: [{ path: "/journal", title: "阅读空间", description: "本站独立发表的记录与说明。" }],
   appearance: { preset: "pearl", scheme: "light", codePalette: "auto" },
@@ -23,7 +23,7 @@ export default defineFolioConfig({
     groups: [{
       title: "更多",
       links: [
-        { label: "关于本站", href: "/about.html" },
+        { label: "关于本站", href: "/about" },
         { label: "母站 tomz.io", href: "https://tomz.io/", newTab: true },
         { label: "工程站 mira.tomz.io", href: "https://mira.tomz.io/", newTab: true },
       ],

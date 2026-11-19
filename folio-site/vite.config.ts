@@ -17,7 +17,6 @@ export default defineConfig({
     folio({
       contentDir: path.resolve(here, "content"),
       config,
-      route: (sourcePath, doc) => "/journal/" + doc.path.replace(/^\/+/, ""),
       staticRoutes: {
         locale: "zh_CN",
         siteName: config.title,

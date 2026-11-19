@@ -2,6 +2,7 @@
 title: 关于这个阅读空间
 description: 国内官网的内容入口、原站与工程站之间的关系。
 type: doc
+collection: 阅读空间
 group: 阅读
 order: 1
 status: published
@@ -15,7 +16,7 @@ status: published
 
 现在，本站开始使用 [Folio](https://github.com/uichat-mira/folio) 组织可在这里独立发布的文字。内容仍由维护者审阅、保存在 Git 中，构建成不依赖后端数据库的静态网页。
 
-这个阅读空间不会把母站的文章整批复制过来，也不会伪造尚未写下的文章。现有 [记录索引](https://tomzlab.cn/notes.html) 和 [见π周刊](https://tomzlab.cn/weekly.html) 仍然指向真实的原文。
+这个阅读空间不会把母站的文章整批复制过来，也不会伪造尚未写下的文章。现有 [记录索引](../../../notes/) 和 [见π周刊](../../../weekly/) 仍然指向真实的原文。
 
 ## 联系
 

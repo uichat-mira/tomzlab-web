@@ -1,109 +1,98 @@
 #!/usr/bin/env python3
-"""Validate static pages and local navigation without dependencies."""
+"""Independent HTML output checks. No legacy hand-built page is a route owner."""
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlsplit, unquote
+import os
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ["notes.html", "weekly.html", "projects.html", "about.html"]
-NAV = ["index.html", *PAGES]
-
-class Links(HTMLParser):
+OUT = ROOT / "_site"
+ROUTES = ["index.html", "notes/index.html", "weekly/index.html",
+          "projects/index.html", "about/index.html", "journal/index.html",
+          "journal/notes/this-site/index.html"]
+class Inspect(HTMLParser):
     def __init__(self):
         super().__init__()
-        self.links = []
+        self.lang = None
         self.ids = set()
-        self.nav = set()
-        self.in_nav = 0
-        self.has_viewport = self.has_description = self.has_title = False
-        self.lang = ""
+        self.hrefs = []
+        self.viewport = False
+        self.description = False
+        self.headings = 0
+        self.errors = []
     def handle_starttag(self, tag, attrs):
-        d = dict(attrs)
+        a = dict(attrs)
         if tag == "html":
-            self.lang = d.get("lang", "")
-        elif tag == "meta":
-            self.has_viewport |= d.get("name") == "viewport"
-            self.has_description |= d.get("name") == "description"
-        elif tag == "title":
-            self.has_title = True
-        elif tag == "nav":
-            self.in_nav += 1
-        if d.get("id"):
-            assert d["id"] not in self.ids, "duplicate id"
-            self.ids.add(d["id"])
-        value = d.get("href") if tag in ("a","link") else d.get("src") if tag in ("img","script") else None
-        if value:
-            self.links.append(value)
-            if self.in_nav and tag == "a":
-                self.nav.add(value)
-    def handle_endtag(self, tag):
-        if tag == "nav":
-            self.in_nav -= 1
+            self.lang = a.get("lang")
+        if tag == "meta":
+            self.viewport |= a.get("name") == "viewport"
+            self.description |= a.get("name") == "description"
+        if tag == "h1":
+            self.headings += 1
+        if tag == "a":
+            self.hrefs.append(a.get("href", ""))
+        ident = a.get("id")
+        if ident:
+            if ident in self.ids:
+                self.errors.append("duplicate id: " + ident)
+            self.ids.add(ident)
 
 def main():
     errors = []
-    for file in PAGES:
-        path = ROOT / file
+    base = "/" + os.getenv("TOMZLAB_SITE_BASE", "/").strip("/")
+    base = "/" if base == "/" else base + "/"
+    for item in ROUTES:
+        path = OUT / item
         if not path.is_file():
-            errors.append(f"missing page: {file}")
+            errors.append("missing Folio route: " + item)
             continue
-        try:
-            parsed = Links()
-            html = path.read_text(encoding="utf-8")
-            parsed.feed(html)
-            # tomz.io is the mother site and may be linked; retired repos may not.
-            if 'href="https://github.com/dangjingtao/qishu' in html:
-                errors.append(f"retired project link on public page: {file}")
-            if file == "projects.html" and 'href="https://mira.tomz.io/"' not in html:
-                errors.append("missing Mira project documentation link")
-            if "粤ICP备2026168682号-1" not in html or "粤公网安备44020302000372号" not in html or "备案信息（待核发）" in html:
-                errors.append(f"invalid ICP filing footer: {file}")
-            expected_url = f"https://tomzlab.cn/{file}"
-            if f'<link rel="canonical" href="{expected_url}">' not in html:
-                errors.append(f"missing or wrong canonical: {file}")
-            if parsed.lang != "zh-CN" or not parsed.has_viewport or not parsed.has_title:
-                errors.append(f"missing base metadata: {file}")
-            if not parsed.has_description:
-                errors.append(f"missing description: {file}")
-            if set(NAV) - parsed.nav:
-                errors.append(f"missing navigation targets: {file}")
-            for href in parsed.links:
-                uri = urlsplit(href)
-                if uri.scheme or uri.netloc:
-                    if uri.scheme not in ("https","http","mailto"):
-                        errors.append(f"invalid scheme {href}")
-                    continue
-                if href.startswith("//") or uri.path.startswith("/"):
-                    errors.append(f"root/protocol-relative link not Pages-safe: {file} {href}")
-                    continue
-                target = unquote(uri.path) or file
-                if target == "journal/":
-                    if not (ROOT / "folio-site" / "index.html").is_file():
-                        errors.append("missing Folio consumer for journal/")
-                    continue
-                absolute = (ROOT / target).resolve()
-                if target == "index.html":
-                    continue  # Folio builds the root, no duplicate source
-                if target == "journal/":
-                    if not (ROOT / "folio-site" / "content").is_dir():
-                        errors.append("missing Folio journal source")
-                    continue
-                if not absolute.is_relative_to(ROOT) or not absolute.is_file():
-                    errors.append(f"broken local link: {file} {href}")
-        except (AssertionError, ValueError) as e:
-            errors.append(f"{file}: {e}")
-    sitemap = ROOT / "sitemap.xml"
+        content = path.read_text(encoding="utf-8")
+        view = Inspect()
+        view.feed(content)
+        if view.lang != "zh-CN" or not view.viewport or not view.description:
+            errors.append("missing metadata: " + item)
+        if view.headings != 1:
+            errors.append("wrong h1 count: " + item + ": " + str(view.headings))
+        if view.errors:
+            errors.extend(item + " " + err for err in view.errors)
+        if item != "index.html" and "folio-markdown" not in content and item != "journal/index.html":
+            errors.append("Folio markdown not rendered at build: " + item)
+        if item == "notes/index.html":
+            if not any(h.startswith("https://tomz.io/blogs/") for h in view.hrefs):
+                errors.append("missing actual mother-site links")
+            if not any(h.startswith("https://mira.tomz.io/blogs/") for h in view.hrefs):
+                errors.append("missing actual engineering links")
+        if item == "weekly/index.html":
+            if not any(h.startswith("https://tomz.io/weekly/") for h in view.hrefs):
+                errors.append("missing verified weekly covers")
+        if item == "projects/index.html":
+            for url in ("https://mira.tomz.io/", "https://tomz.io/projects/uichat-mira-mobile/",
+                        "https://tomz.io/projects/com-design/", "https://tomz.io/projects/uichat/"):
+                if url not in view.hrefs:
+                    errors.append("missing production project link: " + url)
+        if item == "about/index.html" and "mailto:hello@tomz.io" not in view.hrefs:
+            errors.append("missing contact link")
+        if os.getenv("TOMZLAB_PREVIEW") == "1" and 'content="noindex,nofollow"' not in content:
+            errors.append("preview indexable: " + item)
+    sitemap = OUT / "sitemap.xml"
     try:
-        paths = [urlsplit(e.text or "").path for e in ET.parse(sitemap).findall(".//{*}loc")]
-        expected = ["/", "/notes.html", "/weekly.html", "/projects.html", "/about.html"]
-        if sorted(paths) != sorted(expected):
-            errors.append("invalid sitemap paths")
-    except (OSError,ET.ParseError):
-        errors.append("missing/invalid sitemap")
+        paths = [node.text for node in ET.parse(sitemap).findall(".//{*}loc")]
+        for route in ("/", "/notes/", "/weekly/", "/projects/", "/about/",
+                      "/journal/", "/journal/notes/this-site/"):
+            absolute = "https://tomzlab.cn" + base + route.lstrip("/")
+            if absolute not in paths:
+                errors.append("missing sitemap URL: " + absolute)
+        if any(u.endswith(".html") for u in paths):
+            errors.append("legacy redirects should not be indexed")
+    except (OSError, ET.ParseError):
+        errors.append("invalid Folio sitemap")
+    for slug in ("notes", "weekly", "projects", "about"):
+        stub = OUT / (slug + ".html")
+        if not stub.exists() or "noindex,follow" not in stub.read_text(encoding="utf-8"):
+            errors.append("missing noindex legacy redirect: " + slug)
     if errors:
         raise SystemExit("FAIL:\n" + "\n".join(errors))
-    print(f"PASS: {len(PAGES)} HTML pages, local links, navigation and sitemap")
+    print("PASS: Folio native routes, source links, no-JS content, semantic HTML, canonical sitemap and legacy redirects")
 
 if __name__ == "__main__":
     main()
