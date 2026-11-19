@@ -17,7 +17,6 @@ export type BookCatalog = {
 };
 
 const publisher = "https://tomz.io";
-const covers = new Set(["tomz.io", "assets.tomz.io"]);
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
 
@@ -37,8 +36,8 @@ function coverUrl(value: unknown): value is string | null {
   if (typeof value !== "string") return false;
   try {
     const url = new URL(value);
-    return url.protocol === "https:" && covers.has(url.hostname)
-      && !url.username && !url.password && !url.hash;
+    return url.protocol === "https:"
+      && !url.username && !url.password;
   } catch {
     return false;
   }
@@ -64,7 +63,8 @@ export function isBookCatalog(value: unknown): value is BookCatalog {
     const entries = new Set<string>();
     for (const [i, entry] of book.entries.entries()) {
       if (!isRecord(entry) || typeof entry.title !== "string" || !entry.title.trim()
-          || !publisherUrl(entry.url, "/books/" + book.id + "/")
+          || !(publisherUrl(entry.url, "/books/" + book.id + "/")
+            || publisherUrl(entry.url, "/blogs/"))
           || entry.position !== i + 1 || entries.has(entry.url)) return false;
       entries.add(entry.url);
     }
