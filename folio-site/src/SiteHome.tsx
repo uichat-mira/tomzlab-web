@@ -26,7 +26,8 @@ export function SiteHome() {
       </section>
       <section className="site-home__section" aria-labelledby="site-home-entries">
         <div className="site-home__section-heading">
-          <div><span>INDEX</span><h2 id="site-home-entries">从这里开始</h2></div>
+          <h2 id="site-home-entries">从这里开始</h2>
+          <span>INDEX</span>
         </div>
         <div className="site-home__entries">
           {copy.entries.map((entry) => (
@@ -34,14 +35,9 @@ export function SiteHome() {
               <span className="site-home__entry-label">{entry.id}<b aria-hidden="true">↗</b></span>
               <h3>{entry.title}</h3>
               <p>{entry.description}</p>
-              <span className="site-home__entry-action">{entry.action} →</span>
             </Link>
           ))}
         </div>
-        <Link className="site-home__weekly" to="/weekly">
-          <strong>{copy.weekly}</strong><span>{copy.weeklyDescription}</span>
-          <span>前往周刊 ↗</span>
-        </Link>
       </section>
       <section className="site-home__about" aria-labelledby="site-home-about">
         <span className="site-home__eyebrow">COLOPHON</span>
