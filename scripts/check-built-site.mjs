@@ -39,6 +39,20 @@ for (const [name, fragments] of Object.entries(pages)) {
 const home = await file("index.html");
 mustContain(home, ["folio-header", "folio-footer--structured",
   "粤ICP备2026168682号-1", "粤公网安备44020302000372号", "NOTES / 001"], "home");
+// Every book belongs to tomz.io; the Folio consumer renders only verified
+// cover images and outbound links in the server-visible homepage HTML.
+const catalog = JSON.parse(await readFile(path.join(root, "folio-site/src/books.generated.json"), "utf8"));
+if (catalog.source !== "https://tomz.io/books/" || catalog.books.length < 1)
+  throw new Error("Missing verified tomz.io book catalog");
+mustContain(home, ['id="site-home-books"', 'class="site-home__book-list"',
+  'href="https://tomz.io/books/"'], "book shelf");
+for (const book of catalog.books) {
+  mustContain(home, [book.url, book.cover, book.title], "book shelf");
+}
+if (catalog.status === "snapshot")
+  mustContain(home, ["书架更新暂不可用", catalog.snapshotDate], "book fallback freshness");
+else if (catalog.status !== "live")
+  throw new Error("Unknown book source status");
 if (home.includes("feTurbulence") || home.includes("site-home__paper"))
   throw new Error("Notebook must stay Pearl-compatible flat vector");
 for (const slug of ["notes", "weekly", "projects", "about"]) {

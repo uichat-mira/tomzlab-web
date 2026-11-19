@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { siteHomeCopy as copy } from "./site-content";
 import { NotebookIllustration } from "./NotebookIllustration";
+import catalog from "./books.generated.json";
 
 /** Consumer-owned home body. Folio still owns Header, Footer, theme, routes and mobile navigation. */
 export function SiteHome() {
@@ -38,6 +39,28 @@ export function SiteHome() {
             </Link>
           ))}
         </div>
+      </section>
+      <section className="site-home__books" aria-labelledby="site-home-books">
+        <div className="site-home__books-heading">
+          <div>
+            <h2 id="site-home-books">书架</h2>
+            <p>一些写成了书的内容，仍在 tomz.io 阅读。</p>
+          </div>
+          <a className="site-home__books-all" href={catalog.source} target="_blank" rel="noopener noreferrer">
+            查看完整书架 <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div className="site-home__book-list" aria-label="来自 tomz.io 的书籍">
+          {catalog.books.map((book) => (
+            <a className="site-home__book" key={book.url} href={book.url} target="_blank" rel="noopener noreferrer">
+              <img src={book.cover} alt={book.alt} loading="lazy" decoding="async" width="200" height="267" />
+              <span>{book.title}</span>
+            </a>
+          ))}
+        </div>
+        {catalog.status === "snapshot" && (
+          <p className="site-home__books-status">书架更新暂不可用，这里展示 {catalog.snapshotDate} 的索引快照。</p>
+        )}
       </section>
       <section className="site-home__about" aria-labelledby="site-home-about">
         <span className="site-home__eyebrow">COLOPHON</span>

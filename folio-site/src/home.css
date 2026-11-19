@@ -28,6 +28,18 @@
 .site-home__entry-label b{font-size:20px;line-height:1;font-weight:400}
 .site-home__entry h3{font-size:19px;font-weight:600;line-height:1.4;letter-spacing:-.02em;margin:29px 0 10px}
 .site-home__entry p{font-size:13px;line-height:1.9;color:var(--folio-body);margin:0}
+.site-home__books{padding:28px 0 60px}
+.site-home__books-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:26px}
+.site-home__books-heading h2{font-size:20px;font-weight:600;line-height:1.4;letter-spacing:-.02em;margin:0}
+.site-home__books-heading p{font-size:13px;line-height:1.8;color:var(--folio-muted);margin:8px 0 0}
+.site-home__books-all{color:var(--folio-body);font-size:12px;white-space:nowrap;padding-bottom:3px}
+.site-home__books-all:hover,.site-home__book:hover span{color:var(--folio-brand-accent)}
+.site-home__book-list{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:22px}
+.site-home__book{display:block;min-width:0;align-self:start;text-decoration:none}
+.site-home__book img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:contain;background:transparent;border-radius:2px;box-shadow:0 5px 14px #24231e11}
+.site-home__book span{display:block;font-size:12px;line-height:1.6;margin-top:12px;color:var(--folio-body);overflow-wrap:anywhere}
+.site-home__books-status{font-size:11px;color:var(--folio-muted);margin:15px 0 0}
+@media(max-width:760px){.site-home__books{padding:15px 0 42px}.site-home__books-heading{align-items:start;margin-bottom:18px}.site-home__books-heading p{max-width:220px}.site-home__book-list{display:flex;gap:17px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain;padding:0 0 14px;scrollbar-width:thin}.site-home__book{flex:0 0 36%;scroll-snap-align:start}.site-home__book span{font-size:12px;margin-top:9px}}
 .site-home__about{padding:45px 0 42px}
 .site-home__about p{font-size:14px;line-height:2.2;max-width:740px;color:var(--folio-body);margin:19px 0 0}
 .site-home__closing{padding:12px 0 60px;display:flex;align-items:baseline;justify-content:space-between;gap:18px}

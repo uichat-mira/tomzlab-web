@@ -6,7 +6,7 @@
 
 | Route | 页面来源 | 页面渲染 |
 | --- | --- | --- |
-| `/` | `site-content.ts` 的生产首页文字 + SVG 笔记本 | `FolioApp` + `slots.home`，静态首页复用 `SiteHome` |
+| `/` | `site-content.ts` 的生产首页文字 + SVG 笔记本；构建时从 tomz.io 书架采集封面、标题和入口 | `FolioApp` + `slots.home`，静态首页复用 `SiteHome` |
 | `/notes/` | 构建时从 `tomz.io/rss.xml` 和 `mira.tomz.io/blogs/feed.xml` 取最近文章及原文链接 | Folio 原生 `type: page` Markdown |
 | `/weekly/` | 构建时从母站 RSS 提取真实期数的封面 URL（最多 12 期） | Folio 原生 `type: page` Markdown |
 | `/projects/` | 正式站生产分支的四个项目与原始链接 | Folio 原生 `type: page` Markdown |
@@ -14,6 +14,8 @@
 | `/journal/` | 本站自有 Git Markdown | Folio 原生 `collection` + `doc` |
 
 外部作者与原文仍由各自站点负责。Folio 的 `CollectionIndex / EntryList` 默认链接站内文档，因此不能伪造一组本地 Article 来承接母站 RSS；这里采用**仅生成 Markdown 外链索引**的适配层，不引入第二套 React 页面或 DOM 渲染器。
+
+首页书架不另建本地书籍正文：`scripts/sync-books.py` 在构建时读取 `https://tomz.io/books/` 的公开封面与书籍链接，生成被忽略的 `books.generated.json`，Folio 首页 `slots.home` 只负责展示一排封面及跳转。离线时回退到有采集日期的 `snapshots/books-fallback.json` 并在页面标注。书封图直接引用 tomz.io / assets.tomz.io 公共地址，不提交或篡改原图。
 
 旧 `*.html` 链接会自动重定向到新路由，仅留下构建时生成的 noindex 兼容页。原来的 HTML 主页/栏目、feed-sync.js、nav.js 和 site.css 已从消费候选删除，不再拥有站点功能。
 
@@ -36,7 +38,7 @@ python3 scripts/check_site.py
 python3 -m http.server 8768 --directory _site
 ```
 
-`npm run build` 会同步 RSS、生成 Folio Markdown 数据页、执行 Vite/Folio 静态输出、写入旧 URL 跳转和校验产物。获取不到 RSS 时使用显式注明**2026 年 10 月**来源的生产快照，不伪称是最新文章。也可以指定 `TOMZLAB_FEED_MODE=offline` 测试回退，或者 `required` 要求真实 RSS，失败则构建失败。
+`npm run build` 会同步 RSS 及 tomz.io 的书架封面目录、生成 Folio Markdown 数据页、执行 Vite/Folio 静态输出、写入旧 URL 跳转和校验产物。获取不到 RSS 时使用显式注明**2026 年 10 月**来源的生产快照，不伪称是最新文章。也可以指定 `TOMZLAB_FEED_MODE=offline`（也控制书架）测试回退，或者 `required` 要求真实 RSS，失败则构建失败。
 
 ## 发布限制
 
