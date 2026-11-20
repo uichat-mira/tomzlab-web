@@ -5,6 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import config from "./folio.config";
 import { renderStaticSiteHome } from "./src/static-home";
+import { siteFolioListStaticPlugin } from "./list-static-plugin";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const base = process.env.TOMZLAB_SITE_BASE || "/";
@@ -24,6 +25,7 @@ export default defineConfig({
         home: (context) => ({ body: renderStaticSiteHome(context) }),
       },
     }),
+    siteFolioListStaticPlugin(path.resolve(here, "../_site")),
   ],
   build: {
     outDir: path.resolve(here, "../_site"),

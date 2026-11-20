@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Create Folio-native index pages from the original publishers' RSS feeds.
+"""Project original publishers' RSS and local projects into FolioListEntry data.
 
-This is a build-time DATA adapter, not a second page renderer. Folio owns
-parsing, React routing, Markdown, SEO, site shell, and static HTML.
+Folio owns rendering, React routes and SEO. No duplicate Markdown list markup.
 """
 from __future__ import annotations
 
@@ -94,7 +93,7 @@ def load_feed(source: str) -> tuple[list[dict[str, str]] | None, str]:
 def select_notes(rows: list[dict[str, str]], host: str) -> list[dict[str, str]]:
     result = [row for row in rows
               if urllib.parse.urlparse(row["url"]).path.startswith("/blogs/")]
-    return result[:3]
+    return result[:12]
 
 def select_weekly(rows: list[dict[str, str]]) -> list[dict[str, str]]:
     covers: dict[str, dict[str, str]] = {}
@@ -105,28 +104,44 @@ def select_weekly(rows: list[dict[str, str]]) -> list[dict[str, str]]:
             covers[match.group(1)] = row
     return [covers[k] for k in sorted(covers, reverse=True)[:12]]
 
-def md_text(value: str) -> str:
-    return re.sub(r"([\\\[\]])", r"\\\1", value).replace("<", "&lt;").replace(">", "&gt;")
+# Public list entries are data, never a second HTML or Markdown renderer.
+# Retain lightweight Folio type:page documents for route metadata/SEO;
+# the same FolioListPage component renders their interactive and static bodies.
 
-def listing(rows: list[dict[str, str]], host: str) -> str:
-    if not rows:
-        return "暂无已验证的订阅源内容。请前往 [原站](https://" + host + "/) 浏览。\n"
-    lines: list[str] = []
-    for row in rows:
-        url = row["url"].replace(")", "%29")
-        lines.append(f"### [{md_text(row['title'])}]({url})")
-        lines.append("")
-        lines.append(f"_{row['date']}_")
-        lines.append("")
-        if row.get("description"):
-            lines.append(md_text(row["description"]))
-            lines.append("")
-    return "\n".join(lines).rstrip() + "\n"
-
-def write_index(name: str, body: str) -> None:
+def write_index(name: str, title: str, description: str) -> None:
     dest = CONTENT / name / "index.md"
     dest.parent.mkdir(parents=True, exist_ok=True)
-    dest.write_text(body, encoding="utf-8")
+    dest.write_text(
+        "---\n" + "title: " + title + "\n" + "description: " + description +
+        "\ntype: page\npath: /" + name +
+        "\nstatus: published\n---\n\n列表由 FolioListPage 从结构化源数据渲染。\n",
+        encoding="utf-8",
+    )
+
+
+def projects_from_source() -> list[dict[str, str]]:
+    """Original production project Markdown remains the *only* authored source."""
+    source = (CONTENT / "projects.md").read_text(encoding="utf-8")
+    sections = re.findall(
+        r"(?m)^### \[([^\]\n]+)\]\((https://[^)]+)\)\s*\n\s*\n([^\n]+)",
+        source,
+    )
+    if len(sections) != 4:
+        raise RuntimeError("Project list source changed: expected 4 verified Markdown records")
+    seen = set()
+    results = []
+    for title, url, description in sections:
+        host = urllib.parse.urlparse(url).hostname
+        if not valid_url(url, host or "") or host not in {"mira.tomz.io", "tomz.io"} or url in seen:
+            raise RuntimeError("Untrusted/duplicate project URL: " + url)
+        seen.add(url)
+        results.append({
+            "title": plain(title), "url": url,
+            "description": plain(description), "category": "个人项目",
+            "meta": host,
+        })
+    return results
+
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
     futures = {name: pool.submit(load_feed, name) for name in SOURCES}
@@ -138,54 +153,29 @@ life_rows = select_notes(mother, "tomz.io") if mother is not None else SNAPSHOT[
 engineering_rows = select_notes(mira, "mira.tomz.io") if mira is not None else SNAPSHOT["engineering"]
 weekly_rows = select_weekly(mother) if mother is not None else SNAPSHOT["weekly"]
 if not life_rows or not engineering_rows or not weekly_rows:
-    raise SystemExit("No verified source entries for Folio index")
+    raise SystemExit("No verified source entries for Folio list pages")
 
-life_status = "根据母站 RSS 于构建时更新。" if mother is not None else "订阅源不可用；以下为 2026 年 10 月生产站保存的离线快照，并非最新列表。"
-mira_status = "根据工程站 RSS 于构建时更新。" if mira is not None else "订阅源不可用；以下为 2026 年 10 月生产站保存的离线快照，并非最新列表。"
-weekly_status = "根据母站 RSS 于构建时更新。" if mother is not None else "订阅源不可用；以下为 2026 年 10 月生产站保存的离线快照，并非最新期数。"
 
-write_index("notes", """---
-title: 记录
-description: 一些读过的、经历过的、想过的事。正文仍在原站。
-type: page
-path: /notes
-status: published
----
+def project_feed(rows: list[dict[str, str]], category: str, host: str, fresh: bool) -> list[dict[str, str]]:
+    return [{
+        "title": row["title"], "url": row["url"],
+        "description": row.get("description", ""), "date": row["date"],
+        "category": category, "meta": host,
+    } for row in rows]
 
-一些读过的、经历过的、想过的事。通勤、楼梯间、床上，想到就记下来。下面分两组，各取几篇；正文都在原站。
 
-## 生活与长文
+sources = {
+    "life": {"entries": project_feed(life_rows, "生活与长文", "tomz.io", mother is not None), "live": mother is not None},
+    "engineering": {"entries": project_feed(engineering_rows, "工程与产品", "mira.tomz.io", mira is not None), "live": mira is not None},
+    "weekly": {"entries": project_feed(weekly_rows, "见π 周刊", "tomz.io", mother is not None), "live": mother is not None},
+    "projects": {"entries": projects_from_source(), "live": True},
+}
 
-""" + life_status + "\n\n" + listing(life_rows, "tomz.io") + """
-[浏览母站全部文章](https://tomz.io/blogs/)
-
-## 工程与产品
-
-""" + mira_status + "\n\n" + listing(engineering_rows, "mira.tomz.io") + """
-[浏览 Mira 工程文章](https://mira.tomz.io/blogs/)
-
----
-
-这一页是索引，不是副本。文章、配图与评论仍在原站，不会在这里复制全文。
-""")
-
-write_index("weekly", """---
-title: 见π 周刊
-description: 每周一期的编辑桌，正文、配图和目录在 tomz.io。
-type: page
-path: /weekly
-status: published
----
-
-每周一期的编辑桌：本周值得知道的事、人的现场、工程与阅读，还有一些没想透的问题。
-
-""" + weekly_status + "\n\n" + listing(weekly_rows, "tomz.io") + """
-每期封面有一个主题，旁边是几篇当周写下的短文；正文、配图和目录都在母站。
-
-[浏览全部期数](https://tomz.io/weekly/)
-""")
-
-print("Folio native pages: notes life=", len(life_rows),
-      "engineering=", len(engineering_rows),
-      "weekly=", len(weekly_rows),
+out = ROOT / "folio-site" / "src" / "lists.generated.json"
+out.write_text(json.dumps({
+    "snapshotDate": "2026-10", "sources": sources,
+}, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+write_index("notes", "记录", "一些读过的、经历过的、想过的事。正文仍在原站。")
+write_index("weekly", "见π 周刊", "每周一期的编辑桌，正文、配图和目录在 tomz.io。")
+print("Folio native list data:", ", ".join(f"{key}={len(value['entries'])} ({'live' if value['live'] else '2026-10 snapshot'})" for key,value in sources.items()),
       "RSS states:", mother_reason, "/", mira_reason)

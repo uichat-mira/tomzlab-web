@@ -7,7 +7,9 @@
     "dev:folio": "vite --config folio-site/vite.config.ts",
     "build": "node scripts/prepare-site.mjs && python3 scripts/sync-source-index.py && vite build --config folio-site/vite.config.ts && node scripts/write-legacy-redirects.mjs && node scripts/check-built-site.mjs",
     "typecheck": "tsc -p folio-site/tsconfig.json",
-    "check:built": "node scripts/check-built-site.mjs"
+    "check:built": "node scripts/check-built-site.mjs",
+    "pretypecheck": "TOMZLAB_FEED_MODE=offline python3 scripts/sync-source-index.py",
+    "predev:folio": "python3 scripts/sync-source-index.py"
   },
   "dependencies": {
     "@uichat-mira/folio": "0.1.1",

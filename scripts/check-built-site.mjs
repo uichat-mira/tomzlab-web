@@ -18,9 +18,9 @@ function mustContain(value, items, page) {
 }
 const pages = {
   "index.html": ["党靖涛的记事本", "希望十年后它还在。不管我在不在。", "site-home__notebook-art", "<svg", "folio-notebook-paper"],
-  "notes/index.html": ["<h1>记录</h1>", "生活与长文", "工程与产品", "https://tomz.io/blogs/", "https://mira.tomz.io/blogs/"],
-  "weekly/index.html": ["<h1>见π 周刊</h1>", "https://tomz.io/weekly/"],
-  "projects/index.html": ["<h1>项目</h1>", "UIChat Mira", "UIChat Mira Mobile", "ComDesign", "UIChat"],
+  "notes/index.html": ["<h1>记录</h1>", "folio-entry-list--shelf", "生活与长文", "工程与产品", "https://tomz.io/blogs/", "https://mira.tomz.io/blogs/"],
+  "weekly/index.html": ["<h1>见π 周刊</h1>", "folio-entry-list--shelf", "https://tomz.io/weekly/"],
+  "projects/index.html": ["<h1>项目</h1>", "folio-entry-list--shelf", "UIChat Mira", "UIChat Mira Mobile", "ComDesign", "UIChat"],
   "about/index.html": ["<h1>关于这里</h1>", "你好，我是党靖涛", "hello@tomz.io"],
   "journal/index.html": ["阅读空间"],
   "journal/notes/this-site/index.html": ["从门牌到阅读空间", "非经营性的个人网站"],
@@ -35,6 +35,13 @@ for (const [name, fragments] of Object.entries(pages)) {
     throw new Error("Legacy page runtime leaked into " + name);
   const slug = name === "index.html" ? "" : name.replace(/index\.html$/, "");
   mustContain(page, ['href="' + site + base + slug + '"'], "canonical " + name);
+}
+for (const page of ["notes", "weekly", "projects"]) {
+  const html = await file(page + "/index.html");
+  if (html.includes('class="folio-markdown"') || html.includes("列表由 FolioListPage 从结构化源数据渲染")) {
+    throw new Error("Legacy Markdown index leaked into native FolioListPage: " + page);
+  }
+  mustContain(html, ['class="folio-entry-list folio-entry-list--shelf'], "Native Folio list " + page);
 }
 const home = await file("index.html");
 mustContain(home, ["folio-header", "folio-footer--structured",

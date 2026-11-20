@@ -55,7 +55,10 @@ def main():
             errors.append("wrong h1 count: " + item + ": " + str(view.headings))
         if view.errors:
             errors.extend(item + " " + err for err in view.errors)
-        if item != "index.html" and "folio-markdown" not in content and item != "journal/index.html":
+        if item in {"notes/index.html", "weekly/index.html", "projects/index.html"}:
+            if "folio-entry-list--shelf" not in content or "folio-markdown" in content:
+                errors.append("FolioListPage not rendered at build: " + item)
+        elif item not in {"index.html", "journal/index.html"} and "folio-markdown" not in content:
             errors.append("Folio markdown not rendered at build: " + item)
         if item == "notes/index.html":
             if not any(h.startswith("https://tomz.io/blogs/") for h in view.hrefs):
@@ -92,7 +95,7 @@ def main():
             errors.append("missing noindex legacy redirect: " + slug)
     if errors:
         raise SystemExit("FAIL:\n" + "\n".join(errors))
-    print("PASS: Folio native routes, source links, no-JS content, semantic HTML, canonical sitemap and legacy redirects")
+    print("PASS: native FolioListPage static and runtime routes, sources, SEO, sitemap and legacy redirects")
 
 if __name__ == "__main__":
     main()

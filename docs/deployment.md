@@ -2,7 +2,7 @@
 
 ## 目标及路线
 
-当前候选直接消费 `uichat-mira/folio/feat/folio-subscription-poc-20261119@c012ea6` 的公开 API。首页是唯一 `slots.home` 自定义正文；`/notes/`、`/weekly/`、`/projects/`、`/about/` 使用 Folio 统一解析的 `type: page`，`/journal/` 使用 Folio `collection` 和 `doc`。
+当前候选使用固定 Folio `dev@2d123ba`（公开列表）与未合并的书架订阅 Hook `c012ea6`（仅测试包）。首页由 `slots.home` 定制；`/notes/`、`/weekly/`、`/projects/` 使用公共 `FolioListPage` + `slots.pages`；`/about/` 仍是 Folio `type: page`；`/journal/` 仍是 Folio `collection` / `doc`。
 
 站点采用 Folio 原生 Header、Footer、搜索、Pearl、React Router、Markdown、SEO、404 和构建输出。**不要恢复原有四个 HTML 页面**，唯一允许的旧 URL 实体是 build 生成的 noindex redirect stub。
 
@@ -47,3 +47,11 @@ Folio 对外站 RSS 没有导入插件，`FolioEntryList` 默认内链；在**�
 目前 `mira-cloud-infra` 的 `tomzlab-release.yml` 仍只从 site `prod` 拷贝老的静态文件 allowlist，无法部署 `_site/`。必须先审查、实施、验证新的 pinned site SHA 构建发布程序，保持现有 Caddy 行为与原子回滚，再允许环境晋级。
 
 Folio 开发版需要由其仓库正常走 `feat → dev → test → prod` 并发布新 npm 包后才能成为生产依赖。当前 Draft 不动生产 DNS、站点或服务器。公安备案标识图片需要官方备案平台提供，不能用自制素材代替。
+
+## 原生列表页（Folio #196）
+
+三个外部出版栏目由 `scripts/sync-source-index.py` 产生临时结构化 `lists.generated.json`；源站 RSS 与正式项目 `projects.md` 仍是唯一真相源。消费者只把 `FolioListEntry` 交给公共 `FolioListPage`，不创建伪造的本地文章，也不再渲染 Markdown 链接目录。
+
+`FolioApp.slots.pages` 当前是浏览器路由；为了无 JS 时仍能看到真正的原生列表，`folio-site/list-static-plugin.ts` 在 Folio 完成标准静态构建（包括 SEO）后，**只替换 root 正文**为相同的 Folio 列表组件输出。不覆盖 metadata、canonical、sitemap、页面主题/脚本，绝不私自实现第二套 HTML/CSS 列表。上游支持原生静态 slots 后应移除此适配器。测试覆盖普通、离线和 GitHub Pages 子路径构建。
+
+本地 `npx` 初始化器仅用于新站模板试装；因尚未 npm 发布，**不是现有官网的升级命令**。官网通过固定来源的 Folio npm tarball 加载包；详情见 `scripts/pack-folio-candidate.sh`。
