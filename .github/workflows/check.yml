@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate direct publication contracts
+        run: node --test tests/publication-contract.test.mjs
       - name: Validate static site
         run: python3 scripts/check_site.py
   mira-gate:
