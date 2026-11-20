@@ -1,17 +1,15 @@
 import { Link } from "react-router-dom";
 import { siteHomeCopy as copy } from "./site-content";
 import { NotebookIllustration } from "./NotebookIllustration";
-import { useFolioJsonSubscription } from "@uichat-mira/folio";
-import { bookCatalogUrl, bookSnapshotDate, initialBookCatalog, isBookCatalog } from "./book-subscription";
+import { bookSnapshotDate, initialBookCatalog } from "./book-subscription";
+import { validateBooks } from "./publication-contract.mjs";
+import { usePublicationResource } from "./use-publication-resource";
 
 /** Consumer-owned home body. Folio still owns Header, Footer, theme, routes and mobile navigation. */
 export function SiteHome() {
-  const { data: catalog, status: bookStatus } = useFolioJsonSubscription({
-    url: bookCatalogUrl,
-    initialData: initialBookCatalog,
-    validate: isBookCatalog,
-    refreshMs: 300_000,
-  });
+  const { data: catalog, status: bookStatus } = usePublicationResource(
+    "books", validateBooks, initialBookCatalog,
+  );
   const splitAt = copy.lede.indexOf("。");
   const ledeFirst = copy.lede.slice(0, splitAt + 1);
   const ledeSecond = copy.lede.slice(splitAt + 1);
@@ -46,6 +44,10 @@ export function SiteHome() {
             </Link>
           ))}
         </div>
+        <div className="site-home__weekly">
+          <span><strong>见π 周刊</strong>　每周一期的编辑桌。</span>
+          <Link to="/weekly">前往周刊 <span aria-hidden="true">↗</span></Link>
+        </div>
       </section>
       <section className="site-home__books" aria-labelledby="site-home-books">
         <div className="site-home__books-heading">
@@ -66,7 +68,11 @@ export function SiteHome() {
           ))}
         </div>
         {bookStatus !== "fresh" && (
-          <p className="site-home__books-status">{bookStatus === "stale" ? "书架订阅暂不可用" : "书架索引快照"}；当前展示 {bookSnapshotDate} 的书目快照。</p>
+          <p className="site-home__books-status">
+            {bookStatus === "cached" ? "当前展示上次成功订阅的真实书目，联网后自动检查更新。" :
+              bookStatus === "unavailable" ? `出版接口暂不可用，展示 ${bookSnapshotDate} 的书架快照。` :
+              `书架索引快照：${bookSnapshotDate}。`}
+          </p>
         )}
       </section>
       <section className="site-home__about" aria-labelledby="site-home-about">

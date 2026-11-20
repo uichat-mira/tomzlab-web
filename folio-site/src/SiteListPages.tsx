@@ -1,4 +1,6 @@
 import { FolioListPage, type FolioListEntry } from "@uichat-mira/folio";
+import { validateFeed, selectNotes, selectIssues, publishedDate, type PublishedItem, type JsonFeed } from "./publication-contract.mjs";
+import { usePublicationResource, type SubscriptionStatus } from "./use-publication-resource";
 import source from "./lists.generated.json";
 
 export type SiteListSection = "notes" | "weekly" | "projects";
@@ -26,42 +28,78 @@ export function siteListDefinition(section: SiteListSection) {
   return definitions[section];
 }
 
-function listEntries(section: SiteListSection): FolioListEntry[] {
-  const sources = section === "notes"
-    ? [source.sources.life, source.sources.engineering]
-    : [source.sources[section]];
-  return sources.flatMap((item) => item.entries.map((entry) => ({
-    id: entry.url,
-    href: entry.url,
-    title: entry.title,
-    description: entry.description,
-    category: entry.category,
-    ...("date" in entry && typeof entry.date === "string" ? { date: entry.date } : {}),
-    meta: entry.meta,
-  })));
+type SourceRow = { title: string; url: string; description?: string; date?: string; category?: string; meta?: string };
+function projectRows(rows: readonly SourceRow[], category: string, host: string): FolioListEntry[] {
+  return rows.map((row) => ({
+    id: row.url,
+    href: row.url,
+    title: row.title,
+    description: row.description || "",
+    category,
+    ...(row.date ? { date: row.date } : {}),
+    meta: host,
+  }));
+}
+function publishRows(items: readonly PublishedItem[], category: string): FolioListEntry[] {
+  return items.map((item) => ({
+    id: item.id,
+    href: item.url,
+    title: item.title,
+    description: (item.summary || item.content_text || "").trim().slice(0, 120),
+    category,
+    ...(publishedDate(item) ? { date: publishedDate(item) ?? undefined } : {}),
+    meta: "tomz.io",
+  }));
+}
+function sourceStatus(status: SubscriptionStatus, stale: boolean) {
+  if (status === "fresh") return stale ? "工程站目录暂不可用，显示旧版工程索引。" : null;
+  if (status === "cached") return stale
+    ? "母站使用上次成功同步的数据；工程站目录是旧快照。"
+    : "母站使用上次成功同步的数据；联网后自动检查更新。";
+  return stale
+    ? "部分出版源暂不可用，显示 2026 年 10 月留存的旧索引，不代表最新发布。"
+    : "母站出版接口暂不可用，显示构建时的已验证索引。";
 }
 
-/** A single native Folio component owns the browser and static presentation. */
-export function SiteListPage({ section }: { section: SiteListSection }) {
-  const definition = definitions[section];
-  const sources = section === "notes"
-    ? [source.sources.life, source.sources.engineering]
-    : [source.sources[section]];
-  const stale = sources.some((entry) => !entry.live);
+function PublicationListPage({ section }: { section: "notes" | "weekly" }) {
+  // Both consumers use the canonical Tomz.io publication protocol, not Folio's
+  // network subscription Hook. The existing FolioListPage still owns UI.
+  const { data: live, status } = usePublicationResource<JsonFeed | null>("json-feed", validateFeed, null);
+  const engineering = source.sources.engineering;
+  const mother = section === "notes" ? source.sources.life : source.sources.weekly;
+  const current = live
+    ? (section === "notes" ? selectNotes(live, 12) : selectIssues(live, 12))
+    : null;
+  const motherRows = current
+    ? publishRows(current, section === "notes" ? "生活与长文" : "见π 周刊")
+    : projectRows(mother.entries, section === "notes" ? "生活与长文" : "见π 周刊", "tomz.io");
+  const rows = section === "notes"
+    ? [...motherRows, ...projectRows(engineering.entries, "工程与产品", "mira.tomz.io")]
+    : motherRows;
+  const fallback = !mother.live || (section === "notes" && !engineering.live);
+  const alert = sourceStatus(status, fallback);
   return (
     <>
       <FolioListPage
-        {...definition}
-        entries={listEntries(section)}
+        {...definitions[section]}
+        entries={rows}
         variant="shelf"
         showNumbers={false}
-        emptyMessage="尚无经过验证的出版条目。"
+        emptyMessage="当前没有经过验证的出版条目。"
       />
-      {stale ? (
-        <p className="site-list-source-status" role="status">
-          部分订阅源暂不可用。这是 {source.snapshotDate} 留存的旧索引，不代表最新发布。
-        </p>
-      ) : null}
+      {alert ? <p className="site-list-source-status" role="status">{alert}</p> : null}
     </>
   );
+}
+
+function ProjectListPage() {
+  const rows = projectRows(source.sources.projects.entries, "个人项目", "tomz.io");
+  return <FolioListPage {...definitions.projects} entries={rows} variant="shelf" showNumbers={false}
+    emptyMessage="尚无经过验证的项目记录。" />;
+}
+
+/** Same Folio list React tree is used by browser routes and static build. */
+export function SiteListPage({ section }: { section: SiteListSection }) {
+  if (section === "projects") return <ProjectListPage />;
+  return <PublicationListPage section={section} />;
 }

@@ -22,7 +22,6 @@ ROOT = Path(__file__).resolve().parent.parent
 CONTENT = ROOT / "folio-site" / "content"
 SNAPSHOT = json.loads((ROOT / "folio-site" / "snapshots" / "feed-fallback.json").read_text(encoding="utf-8"))
 SOURCES = {
-    "life": ("https://tomz.io/rss.xml", "tomz.io"),
     "engineering": ("https://mira.tomz.io/blogs/feed.xml", "mira.tomz.io"),
 }
 MODE = os.getenv("TOMZLAB_FEED_MODE", "auto").lower()
@@ -95,14 +94,26 @@ def select_notes(rows: list[dict[str, str]], host: str) -> list[dict[str, str]]:
               if urllib.parse.urlparse(row["url"]).path.startswith("/blogs/")]
     return result[:12]
 
-def select_weekly(rows: list[dict[str, str]]) -> list[dict[str, str]]:
-    covers: dict[str, dict[str, str]] = {}
-    for row in rows:
-        path = urllib.parse.urlparse(row["url"]).path
-        match = re.fullmatch(r"/weekly/(\d{3})/?", path)
-        if match:
-            covers[match.group(1)] = row
-    return [covers[k] for k in sorted(covers, reverse=True)[:12]]
+def load_publication() -> tuple[dict[str, list[dict[str, str]]] | None, str]:
+    """The publisher's JSON Feed + discovery are validated by the shared JS contract."""
+    if MODE == "offline":
+        return None, "offline mode"
+    try:
+        proc = subprocess.run(
+            ["node", str(ROOT / "scripts" / "project-publication-index.mjs")],
+            capture_output=True, text=True, check=True, timeout=45, cwd=ROOT,
+        )
+        data = json.loads(proc.stdout)
+        if not all(isinstance(data.get(key), list) and data[key] for key in ("life", "weekly")):
+            raise ValueError("Publisher returned no verified blog/issues")
+        return data, "live JSON Feed /feeds.json"
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired,
+            json.JSONDecodeError, OSError, ValueError) as exc:
+        if MODE == "required":
+            raise RuntimeError("Required JSON publication unavailable: " + str(exc)) from exc
+        print("WARNING: Tomz.io JSON Feed unavailable; retaining dated snapshot: " + str(exc), file=sys.stderr)
+        return None, str(exc)
+
 
 # Public list entries are data, never a second HTML or Markdown renderer.
 # Retain lightweight Folio type:page documents for route metadata/SEO;
@@ -144,14 +155,14 @@ def projects_from_source() -> list[dict[str, str]]:
 
 
 with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
-    futures = {name: pool.submit(load_feed, name) for name in SOURCES}
-    feed = {name: future.result() for name, future in futures.items()}
+    future_mira = pool.submit(load_feed, "engineering")
+    future_publication = pool.submit(load_publication)
+    mira, mira_reason = future_mira.result()
+    publication, mother_reason = future_publication.result()
 
-mother, mother_reason = feed["life"]
-mira, mira_reason = feed["engineering"]
-life_rows = select_notes(mother, "tomz.io") if mother is not None else SNAPSHOT["life"]
+life_rows = publication["life"] if publication is not None else SNAPSHOT["life"]
+weekly_rows = publication["weekly"] if publication is not None else SNAPSHOT["weekly"]
 engineering_rows = select_notes(mira, "mira.tomz.io") if mira is not None else SNAPSHOT["engineering"]
-weekly_rows = select_weekly(mother) if mother is not None else SNAPSHOT["weekly"]
 if not life_rows or not engineering_rows or not weekly_rows:
     raise SystemExit("No verified source entries for Folio list pages")
 
@@ -159,15 +170,16 @@ if not life_rows or not engineering_rows or not weekly_rows:
 def project_feed(rows: list[dict[str, str]], category: str, host: str, fresh: bool) -> list[dict[str, str]]:
     return [{
         "title": row["title"], "url": row["url"],
-        "description": row.get("description", ""), "date": row["date"],
+        "description": row.get("description", ""),
+        **({"date": row["date"]} if row.get("date") else {}),
         "category": category, "meta": host,
     } for row in rows]
 
 
 sources = {
-    "life": {"entries": project_feed(life_rows, "生活与长文", "tomz.io", mother is not None), "live": mother is not None},
+    "life": {"entries": project_feed(life_rows, "生活与长文", "tomz.io", publication is not None), "live": publication is not None},
     "engineering": {"entries": project_feed(engineering_rows, "工程与产品", "mira.tomz.io", mira is not None), "live": mira is not None},
-    "weekly": {"entries": project_feed(weekly_rows, "见π 周刊", "tomz.io", mother is not None), "live": mother is not None},
+    "weekly": {"entries": project_feed(weekly_rows, "见π 周刊", "tomz.io", publication is not None), "live": publication is not None},
     "projects": {"entries": projects_from_source(), "live": True},
 }
 
@@ -178,4 +190,4 @@ out.write_text(json.dumps({
 write_index("notes", "记录", "一些读过的、经历过的、想过的事。正文仍在原站。")
 write_index("weekly", "见π 周刊", "每周一期的编辑桌，正文、配图和目录在 tomz.io。")
 print("Folio native list data:", ", ".join(f"{key}={len(value['entries'])} ({'live' if value['live'] else '2026-10 snapshot'})" for key,value in sources.items()),
-      "RSS states:", mother_reason, "/", mira_reason)
+      "Source states:", mother_reason, "/", mira_reason)

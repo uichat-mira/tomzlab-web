@@ -47,3 +47,10 @@ Folio 的独立项目初始化器已经合入 `dev`，但 `@uichat-mira/create-f
 仍存在的 Folio 本体缺口：默认静态生成的**非首页**页面含列表正文/Markdown、canonical、sitemap 和 robots 信息，却**不包含完整的 Header/Footer**；在 React 加载后才有完整外壳。站点消费层不伪造第二套页面外壳，详见 `docs/deployment.md`。
 
 本地跨域联调可以使用 `VITE_TOMZLAB_BOOK_CATALOG_URL=http://127.0.0.1:8770/books/catalog.json` 构建消费者，出版者在 8770 提供 CORS JSON。此变量只属于隔离测试构建，绝不用于生产部署。
+
+
+## PUB-03 integrated local preview
+
+This candidate combines PR #11 Folio-based UI (shared Header/Footer, Pearl, search, list pages, journal), PR #12 homepage design artifacts, and PUB-03 direct Tomz.io subscriptions. Folio is not the publication network/transport provider. The consumer uses a single validated protocol module for both build-time projection and browser updates: https://tomz.io/feeds.json, https://tomz.io/feed.json, https://tomz.io/books/catalog.json. The Mira engineering list continues to use the engineering publisher RSS. Offline/invalid responses retain last verified browser data or dated build snapshots. No local preview change promotes dev/test/prod or deploys the public site.
+
+Validation: npm run test:contract && npm run typecheck && npm run build && python3 scripts/check_site.py

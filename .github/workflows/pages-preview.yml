@@ -26,15 +26,16 @@ jobs:
           cache: npm
       - name: Install locked consumer dependencies
         run: npm ci --no-audit --no-fund
-      - name: Package pinned Folio dev and separate subscription Hook
+      - name: Package pinned Folio UI for this consumer
         run: bash scripts/pack-folio-candidate.sh _folio_source "$RUNNER_TEMP"
-      - name: Overlay dev candidate (no lockfile mutation)
+      - name: Overlay pinned Folio UI (no lockfile mutation)
         run: npm install --no-save --package-lock=false --no-audit --no-fund "$RUNNER_TEMP/uichat-mira-folio-0.1.1.tgz"
       - name: Build Pages preview
         env:
           TOMZLAB_SITE_BASE: /tomzlab-web/
           TOMZLAB_PREVIEW: '1'
         run: |
+          npm run test:contract
           npm run typecheck
           npm run build
           python3 scripts/check_site.py
