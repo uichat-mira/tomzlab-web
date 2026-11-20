@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: uichat-mira/folio
-          ref: 2d123baf8f76c22ad1bac53b779359e9c66583fc
+          ref: 7d06408aa25bde1b00409366cf302883af67592f
           path: _folio_source
           persist-credentials: false
       - uses: actions/setup-node@v4

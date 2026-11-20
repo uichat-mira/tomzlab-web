@@ -23,11 +23,11 @@
 
 ## 本地验证
 
-需要 Node 24、Python 3 和 curl。当前开发 API 仍未公开发行，测试包来自**两个精确上游提交**（Folio `dev@2d123ba`、未合并的书架订阅 Hook `c012ea6`），由 `scripts/pack-folio-candidate.sh` 管理，不假装 0.1.1 已具备所有功能：
+需要 Node 24、Python 3 和 curl。当前开发 API 仍未公开发行，测试包来自**两个精确上游提交**（Folio `dev@7d06408`、未合并的书架订阅 Hook `c012ea6`），由 `scripts/pack-folio-candidate.sh` 管理，不假装 0.1.1 已具备所有功能：
 
 ```sh
 npm ci --no-audit --no-fund
-# 在已检出 Folio dev@2d123ba 的隔离目录中：
+# 在已检出 Folio dev@7d06408 的隔离目录中：
 bash scripts/pack-folio-candidate.sh /path/to/folio-dev /tmp
 npm install --no-save --package-lock=false /tmp/uichat-mira-folio-0.1.1.tgz
 npm run typecheck

@@ -2,7 +2,7 @@
 
 ## 目标及路线
 
-当前候选使用固定 Folio `dev@2d123ba`（公开列表）与未合并的书架订阅 Hook `c012ea6`（仅测试包）。首页由 `slots.home` 定制；`/notes/`、`/weekly/`、`/projects/` 使用公共 `FolioListPage` + `slots.pages`；`/about/` 仍是 Folio `type: page`；`/journal/` 仍是 Folio `collection` / `doc`。
+当前候选使用固定 Folio `dev@7d06408`（公开列表）与未合并的书架订阅 Hook `c012ea6`（仅测试包）。首页由 `slots.home` 定制；`/notes/`、`/weekly/`、`/projects/` 使用公共 `FolioListPage` + `slots.pages`；`/about/` 仍是 Folio `type: page`；`/journal/` 仍是 Folio `collection` / `doc`。
 
 站点采用 Folio 原生 Header、Footer、搜索、Pearl、React Router、Markdown、SEO、404 和构建输出。**不要恢复原有四个 HTML 页面**，唯一允许的旧 URL 实体是 build 生成的 noindex redirect stub。
 

@@ -4,7 +4,7 @@
 set -euo pipefail
 src="${1:?Expected checked-out Folio source path}"
 destination="${2:?Expected package output directory}"
-dev_sha='2d123baf8f76c22ad1bac53b779359e9c66583fc'
+dev_sha='7d06408aa25bde1b00409366cf302883af67592f'
 subscription_sha='c012ea6d1d995dd1c18c75855b7e9a4a8e8d1b74'
 test "$(git -C "$src" rev-parse HEAD)" = "$dev_sha"
 git -C "$src" fetch --no-tags origin "$subscription_sha"
