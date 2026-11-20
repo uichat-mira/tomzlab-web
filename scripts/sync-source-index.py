@@ -171,6 +171,7 @@ def project_feed(rows: list[dict[str, str]], category: str, host: str, fresh: bo
     return [{
         "title": row["title"], "url": row["url"],
         "description": row.get("description", ""),
+        **({"cover": row["cover"]} if row.get("cover") else {}),
         **({"date": row["date"]} if row.get("date") else {}),
         "category": category, "meta": host,
     } for row in rows]

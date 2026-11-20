@@ -23,7 +23,8 @@ function feed() {
       item("child article", "weekly/010/child/", "article", "weekly", "2026-11-15"),
       item("blog B", "blogs/b/", "article", "blogs", "2026-11-19"),
       item("blog A", "blogs/a/", "article", "blogs", "2026-11-20"),
-      item("issue 009", "weekly/009/", "issue", "weekly", "2026-11-09", 9),
+      { ...item("issue 009", "weekly/009/", "issue", "weekly", "2026-11-09", 9),
+        image: "https://assets.tomz.io/jianpi/009/cover.webp" },
   ]};
 }
 function catalog() {
@@ -55,6 +56,8 @@ test("select publisher kind and issue, never pathname heuristic", () => {
   const data = feed();
   assert.deepEqual(selectNotes(data).map(x => x.title), ["blog A", "blog B"]);
   assert.deepEqual(selectIssues(data).map(x => x.title), ["issue 010", "issue 009"]);
+  assert.equal(selectIssues(data)[1].image, "https://assets.tomz.io/jianpi/009/cover.webp");
+  assert.equal(selectIssues(data)[0].image, undefined, "legacy issue without cover stays text-only");
   assert.equal(publishedDate(data.items[0]), "2026-11-15");
   assert.equal(data.items[0].date_published, undefined);
   data.items[2].url = "https://tomz.io/weekly/012/";
@@ -83,6 +86,23 @@ test("reject duplicate identities, unknown version, unsafe URL and missing conte
   value = feed(); delete value.items[0]._tomzio.issue;
   assert.throws(() => validateFeed(value), /Issue requires/);
 });
+test("Issue covers use publisher-trusted HTTPS; unsafe covers fail validation", () => {
+  const data = feed();
+  assert.equal(validateFeed(data), data);
+  for (const unsafe of [
+    "javascript:alert(1)", "data:image/svg+xml,evil", "https://evil.example/cover.webp",
+    "http://tomz.io/cover.webp", "https://tomz.io@evil.example/cover.webp",
+    "https://assets.tomz.io/cover.webp#fragment",
+  ]) {
+    const changed = feed();
+    changed.items[4].image = unsafe;
+    assert.throws(() => validateFeed(changed), /URL/);
+  }
+  const localMedia = feed();
+  localMedia.items[4].image = "https://assets.tomz.io/tomz-io/media/ab/cover.webp";
+  assert.doesNotThrow(() => validateFeed(localMedia));
+});
+
 test("Book snapshot accepts logical Blog references while enforcing state contract", () => {
   assert.equal(validateBooks(catalog()).books[0].entries[1].position, 2);
   const badCount = catalog(); badCount.books[0].entryCount = 3;

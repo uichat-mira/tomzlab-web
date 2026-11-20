@@ -45,7 +45,9 @@ export function usePublicationResource<T>(
   useEffect(() => {
     let mounted = true;
     let active: AbortController | null = null;
-    const key = "tomzlab-publication-v2:" + kind;
+    // The first JSON Feed subscription predated Issue image. Never hydrate a
+    // fresh cover-enabled page with a still-valid coverless browser cache.
+    const key = "tomzlab-publication-" + (kind === "json-feed" ? "v3:" : "v2:") + kind;
     let latest = getSaved(key, validate);
     if (latest) setState({ data: latest.data, status: "cached", capturedAt: latest.capturedAt });
 

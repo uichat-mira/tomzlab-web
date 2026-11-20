@@ -38,7 +38,7 @@ python3 -m http.server 8784 --directory _site
 
 Folio 的独立项目初始化器已经合入 `dev`，但 `@uichat-mira/create-folio` **尚未发布 npm**。用当前源码打包后可以通过 `npx --package=/path/to/uichat-mira-create-folio-0.1.1.tgz -- create-folio new-site` 验证新项目；**不要对现有国内官网执行初始化器以免替换内容**。现有网站继续通过 npm tarball overlay 消费包本身。
 
-`npm run build` 在构建时同步文章 RSS，并生成条目 JSON、原生 FolioListPage 静态正文和旧 URL 跳转；书架目录由 Folio 在浏览器运行时订阅，静态首屏只使用已验证快照。获取不到 RSS 时使用显式注明**2026 年 10 月**来源的生产快照，不伪称是最新文章。也可以指定 `TOMZLAB_FEED_MODE=offline`（不控制书架订阅）测试回退，或者 `required` 要求真实 RSS，失败则构建失败。
+`npm run build` 在构建时直接读取并校验 Tomz.io 的 `/feeds.json`、`/feed.json`，生成记录、周刊的结构化条目及原生 FolioListPage 静态正文；Mira 工程记录继续独立读取 RSS。周刊封面来自出版者标准 `items[].image`，映射为 Folio 列表的 `cover`，不抓取正文图片。书架由本站 `usePublicationResource` 直接订阅出版者 `/books/catalog.json`，Folio 只负责 UI。旧 URL 跳转由构建生成。获取不到出版接口时使用明确标明**2026 年 10 月**的留存快照，不伪称最新；`TOMZLAB_FEED_MODE=offline` 用于静态回退验证，`required` 要求真实出版源。
 
 ## 发布限制
 
@@ -46,7 +46,7 @@ Folio 的独立项目初始化器已经合入 `dev`，但 `@uichat-mira/create-f
 
 仍存在的 Folio 本体缺口：默认静态生成的**非首页**页面含列表正文/Markdown、canonical、sitemap 和 robots 信息，却**不包含完整的 Header/Footer**；在 React 加载后才有完整外壳。站点消费层不伪造第二套页面外壳，详见 `docs/deployment.md`。
 
-本地跨域联调可以使用 `VITE_TOMZLAB_BOOK_CATALOG_URL=http://127.0.0.1:8770/books/catalog.json` 构建消费者，出版者在 8770 提供 CORS JSON。此变量只属于隔离测试构建，绝不用于生产部署。
+本地浏览器预览直接访问已经公开且支持 CORS 的 Tomz.io 出版接口，不使用临时重写的 API URL；最新内容和封面由出版者拥有，消费者只进行可信 URL 与协议验证。
 
 
 ## PUB-03 integrated local preview

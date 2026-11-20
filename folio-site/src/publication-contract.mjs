@@ -65,6 +65,9 @@ export function validateFeed(feed) {
     }
     ids.add(item.id);
     text(item.title);
+    if (item.image != null) {
+      url(item.image, ["https://tomz.io", "https://assets.tomz.io"]);
+    }
     if (!record(item._tomzio) || !["article", "issue"].includes(item._tomzio.kind) ||
         typeof item._tomzio.section !== "string" ||
         (typeof item.content_text !== "string" && typeof item.content_html !== "string")) {

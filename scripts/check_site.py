@@ -2,6 +2,7 @@
 """Independent HTML output checks. No legacy hand-built page is a route owner."""
 from html.parser import HTMLParser
 from pathlib import Path
+import json
 import os
 import xml.etree.ElementTree as ET
 
@@ -67,7 +68,17 @@ def main():
                 errors.append("missing actual engineering links")
         if item == "weekly/index.html":
             if not any(h.startswith("https://tomz.io/weekly/") for h in view.hrefs):
-                errors.append("missing verified weekly covers")
+                errors.append("missing verified weekly issues")
+            # When the live publisher is available, the pre-rendered Folio page
+            # must carry its real covers without waiting for browser JavaScript.
+            generated = json.loads((ROOT / "folio-site/src/lists.generated.json").read_text(encoding="utf-8"))
+            live_weekly = generated["sources"]["weekly"]
+            covers = [row["cover"] for row in live_weekly["entries"] if row.get("cover")]
+            if live_weekly["live"] and covers:
+                if content.count('class="folio-entry-cover"') < len(covers) or any(
+                    f'src="{cover}"' not in content.replace("&amp;", "&") for cover in covers
+                ):
+                    errors.append("published weekly cover missing from prerendered HTML")
         if item == "projects/index.html":
             for url in ("https://mira.tomz.io/", "https://tomz.io/projects/uichat-mira-mobile/",
                         "https://tomz.io/projects/com-design/", "https://tomz.io/projects/uichat/"):

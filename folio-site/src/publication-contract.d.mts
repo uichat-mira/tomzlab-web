@@ -2,6 +2,7 @@ export interface PublishedItem {
   id: string;
   url: string;
   title: string;
+  image?: string;
   summary?: string;
   content_text?: string;
   date_published?: string;

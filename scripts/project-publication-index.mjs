@@ -14,6 +14,7 @@ const feed = validateFeed(jsonFromPublisher(endpoints["json-feed"]));
 const project = (item) => ({
   title: item.title,
   url: item.url,
+  ...(item._tomzio.kind === "issue" && item.image ? { cover: item.image } : {}),
   ...(publishedDate(item) ? { date: publishedDate(item) } : {}),
   description: String(item.summary || item.content_text || "").replace(/\s+/g, " ").trim().slice(0, 120),
 });

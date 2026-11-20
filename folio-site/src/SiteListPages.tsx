@@ -28,12 +28,13 @@ export function siteListDefinition(section: SiteListSection) {
   return definitions[section];
 }
 
-type SourceRow = { title: string; url: string; description?: string; date?: string; category?: string; meta?: string };
+type SourceRow = { title: string; url: string; description?: string; date?: string; category?: string; meta?: string; cover?: string };
 function projectRows(rows: readonly SourceRow[], category: string, host: string): FolioListEntry[] {
   return rows.map((row) => ({
     id: row.url,
     href: row.url,
     title: row.title,
+    ...(row.cover ? { cover: row.cover } : {}),
     description: row.description || "",
     category,
     ...(row.date ? { date: row.date } : {}),
@@ -45,6 +46,7 @@ function publishRows(items: readonly PublishedItem[], category: string): FolioLi
     id: item.id,
     href: item.url,
     title: item.title,
+    ...(item._tomzio.kind === "issue" && item.image ? { cover: item.image } : {}),
     description: (item.summary || item.content_text || "").trim().slice(0, 120),
     category,
     ...(publishedDate(item) ? { date: publishedDate(item) ?? undefined } : {}),
