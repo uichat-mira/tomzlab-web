@@ -52,14 +52,10 @@
 .site-nojs-nav a{text-decoration:underline;text-underline-offset:4px}
 
 
-/* PR #12 homepage design: two quiet editorial entrances and one weekly link. */
-.site-home__entries{gap:28px}
-.site-home__entry{min-height:0;padding:25px 0 28px;border:0;border-top:1px solid var(--folio-hairline);border-radius:0;background:transparent;transition:padding-left .15s}
-.site-home__entry:hover{padding-left:6px;border-color:var(--folio-hairline)}
-.site-home__entry h3{font:400 23px/1.4 var(--folio-font-reading-heading);margin:24px 0 10px}
-.site-home__entry p{max-width:360px}
+/* Preserve the production two-card entrance layout above; the weekly link
+   stays a lightweight third entry beneath the cards. */
 .site-home__weekly{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:14px;padding:18px 0 2px;border-top:1px solid var(--folio-hairline-soft);color:var(--folio-body);font-size:12px}
 .site-home__weekly strong{font-weight:550;color:var(--folio-ink)}
 .site-home__weekly a{white-space:nowrap;color:var(--folio-body);font-size:12px}
 .site-home__weekly a:hover{color:var(--folio-brand-accent)}
-@media(max-width:760px){.site-home__entries{gap:0}.site-home__entry{padding:23px 0 27px}.site-home__entry h3{font-size:22px;margin:16px 0 9px}.site-home__weekly{align-items:flex-start}.site-home__weekly span{line-height:1.7}}
+@media(max-width:760px){.site-home__weekly{align-items:flex-start}.site-home__weekly span{line-height:1.7}}
