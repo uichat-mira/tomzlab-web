@@ -1,0 +1,32 @@
+{
+  "name": "tomzlab-web",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "scripts": {
+    "dev:folio": "vite --config folio-site/vite.config.ts",
+    "build": "node scripts/prepare-site.mjs && python3 scripts/sync-source-index.py && vite build --config folio-site/vite.config.ts && node scripts/write-legacy-redirects.mjs && node scripts/check-built-site.mjs",
+    "typecheck": "tsc -p folio-site/tsconfig.json",
+    "test:contract": "node --test tests/publication-contract.test.mjs",
+    "check:built": "node scripts/check-built-site.mjs",
+    "pretypecheck": "TOMZLAB_FEED_MODE=offline python3 scripts/sync-source-index.py",
+    "predev:folio": "python3 scripts/sync-source-index.py"
+  },
+  "dependencies": {
+    "@uichat-mira/folio": "0.1.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.18.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.2"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}
