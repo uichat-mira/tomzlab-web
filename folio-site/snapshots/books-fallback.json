@@ -1,0 +1,42 @@
+{
+  "source": "https://tomz.io/books/",
+  "captured_on": "2026-11-19",
+  "books": [
+    {
+      "title": "一起学智能体",
+      "url": "https://tomz.io/books/agent",
+      "cover": "https://tomz.io/books/covers/agent.webp",
+      "alt": "《一起学智能体》封面"
+    },
+    {
+      "title": "AI Agent 编年史 · Mira 研习课",
+      "url": "https://tomz.io/books/agent-chronicle",
+      "cover": "https://tomz.io/books/covers/agent-chronicle.svg",
+      "alt": "《AI Agent 编年史 · Mira 研习课》封面"
+    },
+    {
+      "title": "结合业务学产品",
+      "url": "https://tomz.io/books/product",
+      "cover": "https://tomz.io/books/covers/product.webp",
+      "alt": "《结合业务学产品》封面"
+    },
+    {
+      "title": "读诗篇",
+      "url": "https://tomz.io/books/psalms",
+      "cover": "https://tomz.io/books/covers/psalms.webp",
+      "alt": "《读诗篇》封面"
+    },
+    {
+      "title": "谎颜",
+      "url": "https://tomz.io/books/huangyan",
+      "cover": "https://tomz.io/books/covers/huangyan.webp",
+      "alt": "《谎颜》封面"
+    },
+    {
+      "title": "气数",
+      "url": "https://tomz.io/books/qishu",
+      "cover": "https://assets.tomz.io/images/1790403956330-image-20260926142555993.webp",
+      "alt": "《气数》封面"
+    }
+  ]
+}

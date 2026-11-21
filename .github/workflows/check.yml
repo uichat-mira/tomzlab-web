@@ -1,4 +1,4 @@
-name: Static site checks
+name: Site and Folio checks
 on:
   pull_request:
     branches: [dev, test, prod]
@@ -9,11 +9,33 @@ permissions:
   contents: read
 jobs:
   site-check:
-    name: T2 Static Contract
+    name: T2 Static and Folio Contract
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Validate static site
+      - uses: actions/checkout@v4
+        with:
+          repository: uichat-mira/folio
+          ref: 7d06408aa25bde1b00409366cf302883af67592f
+          path: _folio_source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked consumer dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Package pinned Folio UI for this consumer
+        run: bash scripts/pack-folio-candidate.sh _folio_source "$RUNNER_TEMP"
+      - name: Overlay pinned Folio UI (test-only)
+        run: npm install --no-save --package-lock=false --no-audit --no-fund "$RUNNER_TEMP/uichat-mira-folio-0.1.1.tgz"
+      - name: Direct publisher contract tests
+        run: npm run test:contract
+      - name: Strict TypeScript consumer check
+        run: npm run typecheck
+      - name: Build exact site candidate
+        run: npm run build
+      - name: Verify legacy navigation and link contracts
         run: python3 scripts/check_site.py
   mira-gate:
     name: Mira Gate

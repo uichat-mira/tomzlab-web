@@ -1,0 +1,63 @@
+{
+  "provenance": "Offline fallback captured from tomzlab-web/prod@6a34c9fc (October 2026). Never present this as the current RSS.",
+  "life": [
+    {
+      "title": "后宫只开了一夜：一个独立开发者的云端 Agent 账本",
+      "url": "https://tomz.io/blogs/developer-life/hermes-cloud-harem-one-night/",
+      "date": "2026-10-28",
+      "description": "一套云端 Agent 从组装到拆除只花了一夜。技术跑通了，经营没有。"
+    },
+    {
+      "title": "我太会解释了",
+      "url": "https://tomz.io/blogs/mira-letters/i-explain-too-well/",
+      "date": "2026-10-25",
+      "description": "从一次网站故障和一场《百年孤独》的争论，看见自己最危险的本领。"
+    },
+    {
+      "title": "第十二周：坐下来，看看秋天",
+      "url": "https://tomz.io/blogs/developer-life/week-twelve-she-did-not-write-as-asked/",
+      "date": "2026-10-25",
+      "description": "职场里的爱与愤怒，工程现场的焦头烂额，和一个多年没好好看过的秋天。"
+    }
+  ],
+  "engineering": [
+    {
+      "title": "Mira Next：未来正在发生",
+      "url": "https://mira.tomz.io/blogs/product-journal/mira-next-the-future-is-happening/",
+      "date": "2026-10-31",
+      "description": "从能力、云、多智能体与组织化的交叉处，重新理解 Mira Next：它不是下一代版本，而是持续探索与持续精进。"
+    },
+    {
+      "title": "Agent 能记住你的规矩，但谁允许它改规矩？",
+      "url": "https://mira.tomz.io/blogs/radar/agent-memory-is-not-policy/",
+      "date": "2026-10-31",
+      "description": "GitHub Copilot Memory 正式可用，Dreaming 开始后台整理记忆并提出规则文件修改；Mira 的真实记忆实现提醒我们…"
+    },
+    {
+      "title": "Mira 稳定性周报：10 月 23 日—10 月 30 日",
+      "url": "https://mira.tomz.io/blogs/dev-log/mira-stability-weekly-2026-10-30/",
+      "date": "2026-10-30",
+      "description": ""
+    }
+  ],
+  "weekly": [
+    {
+      "title": "见π 007｜上帝偏爱左手吗？",
+      "url": "https://tomz.io/weekly/007/",
+      "date": "2026-10-24",
+      "description": "本期封面《上帝偏爱左手吗？》从 2026 年诺贝尔化学奖切入手性、非线性放大与自催化，再延伸到南极中微子、历史遗产、艺术、工程与人的现场。"
+    },
+    {
+      "title": "见π 006：Mira 小姐，请冷静！",
+      "url": "https://tomz.io/weekly/006/",
+      "date": "2026-10-19",
+      "description": "当 AI 已经能写代码、派工、审查并推动交付，人为什么还得盯着它？"
+    },
+    {
+      "title": "见π 005：牛马，起来干活了",
+      "url": "https://tomz.io/weekly/005/",
+      "date": "2026-10-08",
+      "description": "External Worker 真正跑起来以后，第五期继续追问：机器怎样多干活，人怎样少当基础设施。"
+    }
+  ]
+}

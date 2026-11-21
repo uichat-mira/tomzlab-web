@@ -1,0 +1,7 @@
+.site-list-source-status {
+  max-width: var(--folio-reading-frame-width);
+  margin: 0 auto 52px;
+  color: var(--folio-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
