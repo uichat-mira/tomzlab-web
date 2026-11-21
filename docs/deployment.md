@@ -1,31 +1,57 @@
-# Deployment and acceptance contract
+# Folio dev 消费者验收与发布边界
 
-## Current boundary
+## 目标及路线
 
-`tomzlab.cn` received ICP approval on 2026-10-29 (`粤ICP备2026168682号`). The site owner authorized first production release on 2026-10-29. The repository still does not automatically change DNS, Caddy, or server files; verify those separately before declaring the site live.
+当前候选使用固定 Folio `dev@7d06408`（公开列表）与未合并的书架订阅 Hook `c012ea6`（仅测试包）。首页由 `slots.home` 定制；`/notes/`、`/weekly/`、`/projects/` 使用公共 `FolioListPage` + `slots.pages`；`/about/` 仍是 Folio `type: page`；`/journal/` 仍是 Folio `collection` / `doc`。
 
-## Environment model
+站点采用 Folio 原生 Header、Footer、搜索、Pearl、React Router、Markdown、SEO、404 和构建输出。**不要恢复原有四个 HTML 页面**，唯一允许的旧 URL 实体是 build 生成的 noindex redirect stub。
 
-- `feat/*`: isolated source changes; PR checks, no deployment.
-- `dev`: integration and checks.
-- `test`: checked candidate plus **GitHub Pages preview**, no separate paid server.
-- `prod`: production source branch; not a deployment itself until a deployment mechanism is authorized.
-- `main`: bootstrap only; does not trigger deployment.
+项目与关于文案取自正式站 `prod@6a34c9fc`，不虚构新的项目或个人介绍。记录/见π周刊索引不搬运正文：`scripts/sync-source-index.py` 在构建期从两个可信 RSS 读取标题、摘要、日期和原站 URL，生成 `folio-site/content/notes/index.md` 与 `weekly/index.md`，再由 Folio 自动解析、渲染、生成静态 HTML。两文件被 gitignore 忽略，不应手工编辑。
 
-## Test preview
+外部 RSS 的 fallback 是 `folio-site/snapshots/feed-fallback.json`，只在拉取失败时使用，且页面**必须清晰说明离线和快照日期**。不要把旧版 007 当成实时最新。确认页面真实包含母站 URL、构建版本和发行状态。
 
-1. Repository **Settings → Pages → Build and deployment → Source → GitHub Actions**. This is a one-time prerequisite and may require an owner/admin. Do not attach `tomzlab.cn` as a Pages custom domain.
-2. Merge/promote the candidate to `test`; `.github/workflows/pages-preview.yml` deploys the allowlisted static HTML, CSS and favicon. Preview address: https://uichat-mira.github.io/tomzlab-web/.
-3. Preview builds add `noindex, nofollow`, disallow crawling in `robots.txt`, and omit production sitemap. All links are relative for the Pages project subpath.
-4. Verify desktop/mobile layouts, local navigation and actual Pages URL (T4). Pages is public; do not store private content.
-5. For arbitrary deeply nested invalid URLs, relative assets/404 navigation may differ. This first version supports only root-level HTML pages and flat missing-page URLs.
+## 外部 JSON 订阅 POC（未上线）
 
-## Production prerequisites
+国内官网 `SiteHome` 通过 Folio dev 公共 `useFolioJsonSubscription` Hook 运行时读取 `https://tomz.io/books/catalog.json`。服务端静态首页仍保持经采集的 `books-fallback.json`（2026-11-19），客户端每次挂载时重新校验并可每 5 分钟轮询，使用浏览器 HTTP 缓存语义。异常状态不抹掉已经呈现的书籍数据。已删除 `sync-books.py` HTML 书架爬虫，未复制任何正文。
 
-1. Confirm filing approval (`粤ICP备2026168682号`, 2026-10-29) and footer linked to https://beian.miit.gov.cn/.
-2. Review existing live Caddy configuration before extending it. Use a dedicated web root and never overwrite the other sites.
-3. Promote the reviewed exact candidate `dev → test → prod`. Release only the web asset allowlist, not repo internal files.
-4. Verify HTTPS, pages, 404, links, viewport behavior, official footer and redirects; run deployed production smoke (T5). Keep a rollback anchor.
-5. Handle any applicable public-security filing/display after release within the statutory timeframe.
+远端 JSON 是独立出版者 PR `dangjingtao/tomz-io#189` 的**候选**，尚未进入正式发布站。Folio Hook 来自 `uichat-mira/folio#195` 的功能分支，consumer CI 暂固定该分支精确 SHA，仅允许 Draft 验证，等 Folio 正式发布 npm 后再切换成发行包。浏览器双端口集成测试在 `8770` 发布 JSON、`8769` 预览消费站：验证 6 本 / 65 章；不重新构建消费者而仅更新 JSON 就能改变显示的篇章数 13 → 14；不兼容 Schema 退回日期化快照，390px/1440px 无横向溢出。本地端口配置绝不进入生产。
 
-`ops/Caddyfile.example` is **reference only**, not activated automatically.
+## 实际验证
+
+本地：
+```sh
+npm run typecheck
+npm run build
+python3 scripts/check_site.py
+# test offline fallback:
+TOMZLAB_FEED_MODE=offline npm run build
+python3 scripts/check_site.py
+```
+
+GitHub Pages 子路径：
+```sh
+TOMZLAB_SITE_BASE=/tomzlab-web/ TOMZLAB_PREVIEW=1 npm run build
+python3 scripts/check_site.py
+```
+
+每个构建均检查 `_site/notes/index.html`、`weekly`、`projects`、`about`、`journal` 与根页、Page SEO、sitemap、noindex 的旧 URL redirect、资源路径、双备案。用真实 Chrome 检查桌面和 390px：Header/Footer 各一份、搜索、菜单、主题、首页到记录的 SPA 跳转及旧 `notes.html` 进入新 Folio 内容的路径。
+
+## 观察到的 Folio dev 真实边界
+
+Folio 原生 React runtime 在所有页面都能呈现 Header/Footer；但是其**默认静态写出**在非首页路由只含内容正文和 SEO，并不 SSR 完整 Header/Footer。首页使用公开的 `staticRoutes.home` + 同一 `SiteHome` + Folio 原生 Header/Footer SSR 做到无 JS 全壳；默认文档页尚未做到。这个缺口应该在 Folio 本体修正，不能为了展示消费成功，给本站添加四套单独 HTML 模板。
+
+Folio 对外站 RSS 没有导入插件，`FolioEntryList` 默认内链；在**不重复全文**的产品约束下使用构建期数据适配 + Folio 原生 `page` 是现有公开 API 的正确边界，不能宣称它是 Folio 原生 RSS 导入器。
+
+## 生产发布阻塞
+
+目前 `mira-cloud-infra` 的 `tomzlab-release.yml` 仍只从 site `prod` 拷贝老的静态文件 allowlist，无法部署 `_site/`。必须先审查、实施、验证新的 pinned site SHA 构建发布程序，保持现有 Caddy 行为与原子回滚，再允许环境晋级。
+
+Folio 开发版需要由其仓库正常走 `feat → dev → test → prod` 并发布新 npm 包后才能成为生产依赖。当前 Draft 不动生产 DNS、站点或服务器。公安备案标识图片需要官方备案平台提供，不能用自制素材代替。
+
+## 原生列表页（Folio #196）
+
+三个外部出版栏目由 `scripts/sync-source-index.py` 产生临时结构化 `lists.generated.json`；源站 RSS 与正式项目 `projects.md` 仍是唯一真相源。消费者只把 `FolioListEntry` 交给公共 `FolioListPage`，不创建伪造的本地文章，也不再渲染 Markdown 链接目录。
+
+`FolioApp.slots.pages` 当前是浏览器路由；为了无 JS 时仍能看到真正的原生列表，`folio-site/list-static-plugin.ts` 在 Folio 完成标准静态构建（包括 SEO）后，**只替换 root 正文**为相同的 Folio 列表组件输出。不覆盖 metadata、canonical、sitemap、页面主题/脚本，绝不私自实现第二套 HTML/CSS 列表。上游支持原生静态 slots 后应移除此适配器。测试覆盖普通、离线和 GitHub Pages 子路径构建。
+
+本地 `npx` 初始化器仅用于新站模板试装；因尚未 npm 发布，**不是现有官网的升级命令**。官网通过固定来源的 Folio npm tarball 加载包；详情见 `scripts/pack-folio-candidate.sh`。

@@ -14,27 +14,49 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Check static site
-        run: python3 scripts/check_site.py
-      - name: Prepare public-only Pages artifact
+      - uses: actions/checkout@v4
+        with:
+          repository: uichat-mira/folio
+          ref: 7d06408aa25bde1b00409366cf302883af67592f
+          path: _folio_source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked consumer dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Package pinned Folio UI for this consumer
+        run: bash scripts/pack-folio-candidate.sh _folio_source "$RUNNER_TEMP"
+      - name: Overlay pinned Folio UI (no lockfile mutation)
+        run: npm install --no-save --package-lock=false --no-audit --no-fund "$RUNNER_TEMP/uichat-mira-folio-0.1.1.tgz"
+      - name: Build Pages preview
+        env:
+          TOMZLAB_SITE_BASE: /tomzlab-web/
+          TOMZLAB_PREVIEW: '1'
         run: |
-          mkdir -p _site
-          cp index.html notes.html weekly.html projects.html about.html 404.html _site/
-          cp -r assets _site/assets
-          touch _site/.nojekyll
-          echo 'User-agent: *' > _site/robots.txt
-          echo 'Disallow: /' >> _site/robots.txt
+          npm run test:contract
+          npm run typecheck
+          npm run build
+          python3 scripts/check_site.py
+      - name: Mark every preview route noindex
+        run: |
           python3 - <<'PY'
           from pathlib import Path
-          for path in Path('_site').glob('*.html'):
+          for path in Path('_site').rglob('*.html'):
               html = path.read_text(encoding='utf-8')
-              html = html.replace('<meta name="viewport"', '<meta name="robots" content="noindex, nofollow">\n  <meta name="viewport"', 1)
+              indexed = '<meta name="robots" content="index,follow">'
+              hidden = '<meta name="robots" content="noindex,nofollow">'
+              if indexed in html:
+                  html = html.replace(indexed, hidden)
+              elif hidden not in html:
+                  html = html.replace('<head>', '<head>\n' + hidden, 1)
               path.write_text(html, encoding='utf-8')
+          Path('_site/robots.txt').write_text('User-agent: *\nDisallow: /\n', encoding='utf-8')
+          Path('_site/.nojekyll').touch()
           PY
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
         with:
           path: _site
   deploy:

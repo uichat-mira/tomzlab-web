@@ -1,0 +1,70 @@
+:root {
+  /* All colors and type roles are inherited from Folio's built-in Pearl preset. */
+  --site-max: 1020px;
+}
+.site-home{width:min(var(--site-max),calc(100% - 64px));margin-inline:auto;color:var(--folio-ink)}
+.site-home__kicker,.site-home__section-heading span,.site-home__entry-label,
+.site-home__eyebrow,.site-home__closing small{font:11px/1.7 var(--folio-font-mono);letter-spacing:.065em;color:var(--folio-muted)}
+.site-home__kicker:before{content:"";display:inline-block;width:5px;height:5px;background:var(--folio-brand-accent);border-radius:50%;margin-right:14px;vertical-align:middle}
+.site-home__hero{min-height:550px;padding:96px 0 84px;display:grid;grid-template-columns:1.35fr .65fr;align-items:center;gap:55px}
+.site-home__hero h1{font:400 clamp(42px,5vw,69px)/1.28 var(--folio-font-reading-heading);letter-spacing:-.045em;margin:26px 0 10px}
+.site-home__english{color:var(--folio-muted);margin:0;font-size:13px}
+.site-home__lede{font:400 clamp(18px,1.7vw,23px)/1.95 var(--folio-font-reading-heading);margin:44px 0 0}
+.site-home__lede span{display:block}
+.site-home__actions{display:flex;align-items:center;gap:25px;flex-wrap:wrap;margin-top:32px;font-size:13px}
+.site-home__primary{background:var(--folio-primary);color:var(--folio-on-primary);padding:13px 20px;display:inline-flex;align-items:center;justify-content:space-between;gap:22px;min-height:46px;border-radius:var(--folio-radius-sm)}
+.site-home__primary:hover{background:var(--folio-primary-active)}
+.site-home__about-link{border-bottom:1px solid var(--folio-hairline);padding-bottom:5px;color:var(--folio-body)}
+.site-home__notebook{height:355px;display:flex;justify-content:center;align-items:center}
+.site-home__notebook-art{width:min(100%,325px);height:auto;overflow:visible;filter:none}
+.site-home__section{padding:55px 0 65px}
+.site-home__section-heading{display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-bottom:26px}
+.site-home__section-heading h2{font-size:20px;font-weight:600;line-height:1.4;letter-spacing:-.02em;margin:0}
+.site-home__about h2{font:400 28px/1.4 var(--folio-font-reading-heading);margin:8px 0 0}
+.site-home__entries{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.site-home__entry{display:block;min-height:196px;padding:27px 29px 28px;border:1px solid var(--folio-hairline);border-radius:14px;background:color-mix(in srgb,var(--folio-surface-card) 55%,transparent);transition:border-color .2s}
+.site-home__entry:hover{border-color:var(--folio-muted-soft)}
+.site-home__entry-label{display:flex;justify-content:space-between}
+.site-home__entry-label b{font-size:20px;line-height:1;font-weight:400}
+.site-home__entry h3{font-size:19px;font-weight:600;line-height:1.4;letter-spacing:-.02em;margin:29px 0 10px}
+.site-home__entry p{font-size:13px;line-height:1.9;color:var(--folio-body);margin:0}
+.site-home__books{padding:28px 0 60px}
+.site-home__books-heading{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:26px}
+.site-home__books-heading h2{font-size:20px;font-weight:600;line-height:1.4;letter-spacing:-.02em;margin:0}
+.site-home__books-heading p{font-size:13px;line-height:1.8;color:var(--folio-muted);margin:8px 0 0}
+.site-home__books-all{color:var(--folio-body);font-size:12px;white-space:nowrap;padding-bottom:3px}
+.site-home__books-all:hover,.site-home__book:hover span{color:var(--folio-brand-accent)}
+.site-home__book-list{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:22px}
+.site-home__book{display:block;min-width:0;align-self:start;text-decoration:none}
+.site-home__book img{display:block;width:100%;height:auto;aspect-ratio:3/4;object-fit:contain;background:transparent;border-radius:2px;box-shadow:0 5px 14px #24231e11}
+.site-home__book span{display:block;font-size:12px;line-height:1.6;margin-top:12px;color:var(--folio-body);overflow-wrap:anywhere}
+.site-home__books-status{font-size:11px;color:var(--folio-muted);margin:15px 0 0}
+@media(max-width:760px){.site-home__books{padding:15px 0 42px}.site-home__books-heading{align-items:start;margin-bottom:18px}.site-home__books-heading p{max-width:220px}.site-home__book-list{display:flex;gap:17px;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain;padding:0 0 14px;scrollbar-width:thin}.site-home__book{flex:0 0 36%;scroll-snap-align:start}.site-home__book span{font-size:12px;margin-top:9px}}
+.site-home__about{padding:45px 0 42px}
+.site-home__about p{font-size:14px;line-height:2.2;max-width:740px;color:var(--folio-body);margin:19px 0 0}
+.site-home__closing{padding:12px 0 60px;display:flex;align-items:baseline;justify-content:space-between;gap:18px}
+.site-home__closing p{margin:0;font:400 21px/1.7 var(--folio-font-reading-heading)}
+.site-brand{display:inline-flex;align-items:center;gap:9px;font-weight:650;letter-spacing:-.04em}
+.site-brand img{width:17px;height:21px}.site-brand span{font-size:18px}
+@media(max-width:760px){.site-home{width:calc(100% - 42px)}.site-home__hero{display:block;min-height:auto;padding:68px 0 70px}.site-home__hero h1{font-size:clamp(38px,9vw,48px)}.site-home__lede{margin-top:38px;font-size:18px}.site-home__notebook{display:none}.site-home__section{padding:45px 0}.site-home__entries{grid-template-columns:1fr;gap:12px}.site-home__entry{padding:22px;min-height:160px}.site-home__entry h3{margin:22px 0 9px;font-size:19px}.site-home__about{padding-top:48px}.site-home__closing{display:block}.site-home__closing small{display:block;margin-top:14px}}
+
+.site-nojs-nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 24px;padding:16px 24px;border-bottom:1px solid var(--folio-hairline);font-size:13px;background:var(--folio-surface-soft)}
+.site-nojs-nav a{text-decoration:underline;text-underline-offset:4px}
+
+/* Copyright on the first centered line; registrations below it.
+   Keep Folio's native footer, official links, and narrow-screen wrapping. */
+.folio-footer--structured .folio-footer__legal{
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  padding:12px 0 32px;
+  text-align:center;
+}
+.folio-footer--structured .folio-footer__copyright{
+  margin-right:0;
+  flex-basis:auto;
+}
+.folio-footer--structured .folio-footer__registrations{
+  justify-content:center;
+}
