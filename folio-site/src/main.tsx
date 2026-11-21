@@ -15,7 +15,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <FolioApp
       config={config}
-      docs={(docs as FolioDoc[]).filter((doc) => !["/notes", "/weekly", "/projects"].includes(doc.path))}
+      docs={(docs as FolioDoc[]).filter((doc) => !["/notes", "/engineering", "/weekly", "/projects"].includes(doc.path))}
       basePath={basePath}
       ui={{ defaultTheme: "light" }}
       slots={{
@@ -23,6 +23,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         home: <SiteHome />,
         pages: [
           { path: "/notes", element: <SiteListPage section="notes" /> },
+          { path: "/engineering", element: <SiteListPage section="engineering" /> },
           { path: "/weekly", element: <SiteListPage section="weekly" /> },
           { path: "/projects", element: <SiteListPage section="projects" /> },
         ],

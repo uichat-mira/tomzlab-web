@@ -9,6 +9,7 @@ export default defineFolioConfig({
   navigation: [
     { label: "首页", href: "/" },
     { label: "记录", href: "/notes" },
+    { label: "工程", href: "/engineering" },
     { label: "周刊", href: "/weekly" },
     { label: "项目", href: "/projects" },
     { label: "关于", href: "/about" },
@@ -16,18 +17,7 @@ export default defineFolioConfig({
   collections: [{ path: "/journal", title: "阅读空间", description: "本站独立发表的记录与说明。" }],
   appearance: { preset: "pearl", scheme: "light", codePalette: "auto" },
   footer: {
-    brand: {
-      name: "党靖涛的记事本",
-      description: "写一点生活，记一点工作。",
-    },
-    groups: [{
-      title: "更多",
-      links: [
-        { label: "关于本站", href: "/about" },
-        { label: "母站 tomz.io", href: "https://tomz.io/", newTab: true },
-        { label: "工程站 mira.tomz.io", href: "https://mira.tomz.io/", newTab: true },
-      ],
-    }],
+    // The navigation is already in the header and About; keep only the legal signature.
     legal: {
       copyright: "© 2026 · 党靖涛的记事本",
       registrations: [

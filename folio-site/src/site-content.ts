@@ -1,4 +1,4 @@
-/** Production-authorized home copy from tomzlab-web/prod@6a34c9fc. One source shared by React and static output. */
+/** Consumer-owned homepage copy, shared by React and the static build. */
 export const siteHomeCopy = {
   name: "党靖涛的记事本",
   kicker: "GUANGZHOU / INDEPENDENT / AI PRODUCTS",
@@ -8,11 +8,23 @@ export const siteHomeCopy = {
     {
       id: "01 / NOTES",
       title: "记录与文字",
-      description: "关于日常、阅读、技术，以及一些还没有答案的问题。",
+      description: "关于生活、阅读、随笔，以及一些还没有答案的问题。",
       url: "/notes",
     },
     {
-      id: "02 / PROJECTS",
+      id: "02 / ENGINEERING",
+      title: "工程与产品",
+      description: "Mira 的研发实践、产品设计与技术复盘。",
+      url: "/engineering",
+    },
+    {
+      id: "03 / WEEKLY",
+      title: "见π 周刊",
+      description: "每周一期的编辑桌，记录科技、人物与值得琢磨的事情。",
+      url: "/weekly",
+    },
+    {
+      id: "04 / PROJECTS",
       title: "项目与实验",
       description: "个人作品、开放项目，还有认真折腾过的小东西。",
       url: "/projects",

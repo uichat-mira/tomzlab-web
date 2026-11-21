@@ -51,11 +51,20 @@
 .site-nojs-nav{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:14px 24px;padding:16px 24px;border-bottom:1px solid var(--folio-hairline);font-size:13px;background:var(--folio-surface-soft)}
 .site-nojs-nav a{text-decoration:underline;text-underline-offset:4px}
 
-
-/* Preserve the production two-card entrance layout above; the weekly link
-   stays a lightweight third entry beneath the cards. */
-.site-home__weekly{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-top:14px;padding:18px 0 2px;border-top:1px solid var(--folio-hairline-soft);color:var(--folio-body);font-size:12px}
-.site-home__weekly strong{font-weight:550;color:var(--folio-ink)}
-.site-home__weekly a{white-space:nowrap;color:var(--folio-body);font-size:12px}
-.site-home__weekly a:hover{color:var(--folio-brand-accent)}
-@media(max-width:760px){.site-home__weekly{align-items:flex-start}.site-home__weekly span{line-height:1.7}}
+/* Copyright on the first centered line; registrations below it.
+   Keep Folio's native footer, official links, and narrow-screen wrapping. */
+.folio-footer--structured .folio-footer__legal{
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:6px;
+  padding:12px 0 32px;
+  text-align:center;
+}
+.folio-footer--structured .folio-footer__copyright{
+  margin-right:0;
+  flex-basis:auto;
+}
+.folio-footer--structured .folio-footer__registrations{
+  justify-content:center;
+}

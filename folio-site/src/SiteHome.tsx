@@ -44,10 +44,6 @@ export function SiteHome() {
             </Link>
           ))}
         </div>
-        <div className="site-home__weekly">
-          <span><strong>见π 周刊</strong>　每周一期的编辑桌。</span>
-          <Link to="/weekly">前往周刊 <span aria-hidden="true">↗</span></Link>
-        </div>
       </section>
       <section className="site-home__books" aria-labelledby="site-home-books">
         <div className="site-home__books-heading">

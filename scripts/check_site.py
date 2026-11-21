@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "_site"
-ROUTES = ["index.html", "notes/index.html", "weekly/index.html",
+ROUTES = ["index.html", "notes/index.html", "engineering/index.html", "weekly/index.html",
           "projects/index.html", "about/index.html", "journal/index.html",
           "journal/notes/this-site/index.html"]
 class Inspect(HTMLParser):
@@ -17,6 +17,7 @@ class Inspect(HTMLParser):
         self.lang = None
         self.ids = set()
         self.hrefs = []
+        self.list_hrefs = []
         self.viewport = False
         self.description = False
         self.headings = 0
@@ -32,6 +33,8 @@ class Inspect(HTMLParser):
             self.headings += 1
         if tag == "a":
             self.hrefs.append(a.get("href", ""))
+            if "folio-entry" in a.get("class", "").split():
+                self.list_hrefs.append(a.get("href", ""))
         ident = a.get("id")
         if ident:
             if ident in self.ids:
@@ -56,16 +59,19 @@ def main():
             errors.append("wrong h1 count: " + item + ": " + str(view.headings))
         if view.errors:
             errors.extend(item + " " + err for err in view.errors)
-        if item in {"notes/index.html", "weekly/index.html", "projects/index.html"}:
+        if item in {"notes/index.html", "engineering/index.html", "weekly/index.html", "projects/index.html"}:
             if "folio-entry-list--shelf" not in content or "folio-markdown" in content:
                 errors.append("FolioListPage not rendered at build: " + item)
+            if 'class="folio-entry-category"' in content:
+                errors.append("redundant per-row category on dedicated list: " + item)
         elif item not in {"index.html", "journal/index.html"} and "folio-markdown" not in content:
             errors.append("Folio markdown not rendered at build: " + item)
         if item == "notes/index.html":
-            if not any(h.startswith("https://tomz.io/blogs/") for h in view.hrefs):
-                errors.append("missing actual mother-site links")
-            if not any(h.startswith("https://mira.tomz.io/blogs/") for h in view.hrefs):
-                errors.append("missing actual engineering links")
+            if not view.list_hrefs or any(not h.startswith("https://tomz.io/blogs/") for h in view.list_hrefs):
+                errors.append("notes must contain only Tomz.io blog entries")
+        if item == "engineering/index.html":
+            if not view.list_hrefs or any(not h.startswith("https://mira.tomz.io/blogs/") for h in view.list_hrefs):
+                errors.append("engineering must contain only Mira blog entries")
         if item == "weekly/index.html":
             if not any(h.startswith("https://tomz.io/weekly/") for h in view.hrefs):
                 errors.append("missing verified weekly issues")
@@ -91,7 +97,7 @@ def main():
     sitemap = OUT / "sitemap.xml"
     try:
         paths = [node.text for node in ET.parse(sitemap).findall(".//{*}loc")]
-        for route in ("/", "/notes/", "/weekly/", "/projects/", "/about/",
+        for route in ("/", "/notes/", "/engineering/", "/weekly/", "/projects/", "/about/",
                       "/journal/", "/journal/notes/this-site/"):
             absolute = "https://tomzlab.cn" + base + route.lstrip("/")
             if absolute not in paths:

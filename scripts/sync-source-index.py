@@ -167,7 +167,7 @@ if not life_rows or not engineering_rows or not weekly_rows:
     raise SystemExit("No verified source entries for Folio list pages")
 
 
-def project_feed(rows: list[dict[str, str]], category: str, host: str, fresh: bool) -> list[dict[str, str]]:
+def project_feed(rows: list[dict[str, str]], category: str, host: str) -> list[dict[str, str]]:
     return [{
         "title": row["title"], "url": row["url"],
         "description": row.get("description", ""),
@@ -178,9 +178,9 @@ def project_feed(rows: list[dict[str, str]], category: str, host: str, fresh: bo
 
 
 sources = {
-    "life": {"entries": project_feed(life_rows, "生活与长文", "tomz.io", publication is not None), "live": publication is not None},
-    "engineering": {"entries": project_feed(engineering_rows, "工程与产品", "mira.tomz.io", mira is not None), "live": mira is not None},
-    "weekly": {"entries": project_feed(weekly_rows, "见π 周刊", "tomz.io", publication is not None), "live": publication is not None},
+    "life": {"entries": project_feed(life_rows, "生活与文字", "tomz.io"), "live": publication is not None},
+    "engineering": {"entries": project_feed(engineering_rows, "工程与产品", "mira.tomz.io"), "live": mira is not None},
+    "weekly": {"entries": project_feed(weekly_rows, "见π 周刊", "tomz.io"), "live": publication is not None},
     "projects": {"entries": projects_from_source(), "live": True},
 }
 
@@ -188,7 +188,8 @@ out = ROOT / "folio-site" / "src" / "lists.generated.json"
 out.write_text(json.dumps({
     "snapshotDate": "2026-10", "sources": sources,
 }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-write_index("notes", "记录", "一些读过的、经历过的、想过的事。正文仍在原站。")
+write_index("notes", "记录与文字", "生活、阅读、随笔与个人思考。正文仍在 tomz.io。")
+write_index("engineering", "工程与产品", "Mira 的研发实践、产品设计与技术复盘。正文仍在 mira.tomz.io。")
 write_index("weekly", "见π 周刊", "每周一期的编辑桌，正文、配图和目录在 tomz.io。")
 print("Folio native list data:", ", ".join(f"{key}={len(value['entries'])} ({'live' if value['live'] else '2026-10 snapshot'})" for key,value in sources.items()),
       "Source states:", mother_reason, "/", mira_reason)

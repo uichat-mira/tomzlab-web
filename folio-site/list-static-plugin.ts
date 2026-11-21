@@ -22,7 +22,7 @@ export function siteFolioListStaticPlugin(outDir: string): Plugin {
     name: "tomzlab-folio-list-static",
     apply: "build",
     closeBundle() {
-      for (const section of ["notes", "weekly", "projects"] as const satisfies readonly SiteListSection[]) {
+      for (const section of ["notes", "engineering", "weekly", "projects"] as const satisfies readonly SiteListSection[]) {
         const file = path.join(outDir, section, "index.html");
         const html = readFileSync(file, "utf8");
         const root = '<div id="root">';
