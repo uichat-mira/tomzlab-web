@@ -78,6 +78,7 @@ export function SiteHome() {
       <section className="site-home__about" aria-labelledby="site-home-about">
         <span className="site-home__eyebrow">COLOPHON</span>
         <h2 id="site-home-about">{copy.aboutTitle}</h2>
+        <p>{copy.aboutIntro}</p>
         <p>{copy.about}</p>
         <p>{copy.aboutSecond}</p>
       </section>
